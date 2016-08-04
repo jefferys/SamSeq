@@ -1,0 +1,11 @@
+Package: SamSeq
+Type: Package
+Title: Work with aligned read information from a SAM file
+Version: 0.0.1
+Author: Stuart R. Jefferys
+Maintainer: Stuart R. Jefferys <srj@unc.edu>
+Description: Work with the aligned read data as provided in a *.sam file, as in
+ the format used by SamTools.
+License: MIT + file LICENSE
+LazyData: TRUE
+RoxygenNote: 5.0.1
