@@ -1,0 +1,21 @@
+---
+title: "Developer Notes 0.0.1"
+author: "Stuart R. Jefferys"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Develper Notes 0.0.1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Sam test file
+
+I really just want a small ```*.sam``` file to use for testing, but I can't find one licensed for redistribution under an MIT license. So I'm creating a fake one.
+However, to ensure this fake one is actually a good file, I need to validate it. The java-based [Picard tools](http://broadinstitute.github.io/picard/) from the Broad Institute contains a pretty good, widely used one, and it is MIT licensed, so I'm using that to ensure the file I build is compliant.
+
+### ```validate(file.sam)```
+Since I'm building a file step by step and checking each with a validator, I'm going to use the steps to consturct my own validator function here too, because it's not much more work, just need to save each incremetal test and test file - in testthat/badSam. I need a mechanism to handle warning on errors, or ignoring them. To allow interoperability, I'll use the same name for the errors as Picard tools, where possible, and use character vectors of error names to specify which are errors, which are warnings, and which are skipped. I'll also abort after too many warnings.
+
+
+
