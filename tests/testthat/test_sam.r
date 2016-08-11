@@ -19,6 +19,6 @@ describe( "Saving a samFile object to disk as a samFile", {
    })
    it( "Saving a just-read samFile object exactly reproduces the sam file \
        it was read from", {
-          fail()
+      fail()
    })
 })

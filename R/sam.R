@@ -1,12 +1,29 @@
-#' Loads a *.sam file.
+#' Create a sam (sequence alignment/map) object.
 #'
-#' Reads the data from a \file{*.sam} file into a \code{samFile} object. This is
-#' supposed to be an opaque object for use in other functions. Limited to only
-#' what can be read into memory and manipulated, which is probably at best about
-#' 1/3 of the total memory on the system (due to \R functions being "copy by
-#' value".) Does not support reading \file{*.bam} files.
+#' An object of class \code{sam} represents a \file{*.sam} file. This is
+#' supposed to be an opaque object for use by other functions, which make up the
+#' bulk of this package. The size of a \code{sam} object is limited to only what
+#' can be read into memory and manipulated, which is probably at best about 1/3
+#' of the total memory on the system (due to \R functions being "copy by
+#' value".) A \code{sam} object can be written back to a file by assigning the
+#' value to the constructor call. No support is provided for reading or writing
+#' \file{*.bam} files.
 #'
-#' @seealso \code{samHeader}, \code{samReads}, \code{samMeta}.
+#' A sam object is composed of three parts, a \code{\link{samHeader}},
+#' \code{\link{samReads}}, and \code{\link{samMeta}} data. These parts can be
+#' extracted as objects of the same name by constructor functions of the same
+#' name applied to the \code{sam} object. Any function that works when applied
+#' to a component object will work on the \code{sam} object too.
+#'
+#' @param file A *.sam file name.
+#'
+#' @param value A \code{sam} object to write to a sam file.
+#'
+#' @return A \code{sam} object. Nothing is returned by the function that writes
+#' a file. Writing to a new file name does not change what is returned by
+#' \code{getFilename(samObj)} or \code{getFileName(samMeta(samObj))}.
+#'
+#' @seealso \code{samHeader}, \code{samReads}, \code{samMeta}
 #'
 #' @section Internals: A list with three elements:
 #' \itemize{
@@ -15,13 +32,25 @@
 #'    \item{"samMeta" - a \code{samMeta} object.}
 #' }
 #'
-#' @return A \code{samFile} object.
-#'
 #' @examples
-#' mySamFile <- samFile( 'myFile.sam' )
+#' samObj <- sam( 'myFile.sam' )
+#' sam('newFile.sam') <- samObj
+#' tools::md5('myFile.sam') == tools::md5('newFile.sam')
 #'
-#' @param file The name of the sam file to load.
+#' myHeader <- samHeader(samObj)
+#' myReads <- samReads(samObj)
+#' myMeta <- samMeta(samObj)
+#'
 #' @export
-samFile <- function( file ) {
+sam <- function( file ) {
    structure(list(), class="samFile")
+}
+
+#' @rdname sam
+#' @export
+`sam<-` <- function( file, value ) {
+    # Open file
+    # Write headers
+    # Write reads
+    # Check minimal metrics
 }
