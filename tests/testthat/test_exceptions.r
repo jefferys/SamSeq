@@ -25,6 +25,103 @@ describe( "condition() object constructor", {
    })
 })
 
+describe( "Extending an exception with extendException()", {
+   it( "Extends the correct base class", {
+      e <- extendException( "NewException", base=condition() )
+      got <- class( e )
+      want <- c("NewException", "condition")
+      expect_equal( got, want )
+
+      ee <- extendException( "newNewException", base= e )
+      got <- class( ee )
+      want <- c("newNewException", "NewException", "condition")
+      expect_equal( got, want )
+
+      default <- extendException( "childException" )
+      got <- class( default )
+      want <- c("childException", "Exception", "condition")
+      expect_equal( got, want )
+   })
+   it( "Extending an exception overrides the message, if specified", {
+      e <- extendException( "NewException", base=condition() )
+      got <- conditionMessage( e )
+      want <- "condition"
+      expect_equal( got, want )
+
+      e <- extendException( "NewException", base=condition("Inherited message") )
+      got <- conditionMessage( e )
+      want <- "Inherited message"
+      expect_equal( got, want )
+
+      e <- extendException( "NewException", base=condition(),
+                            message= "New Exception message" )
+      got <- conditionMessage( e )
+      want <- "New Exception message"
+      expect_equal( got, want )
+
+      e <- extendException( "NewException", base=condition("Inherited message"),
+                            message= "New Exception message" )
+      got <- conditionMessage( e )
+      want <- "New Exception message"
+      expect_equal( got, want )
+
+   })
+   it( "Extending an exception overrides the call, if specified", {
+      aCall <- sys.call()
+      bCall <- sys.calls()
+      expect_false( isTRUE(all.equal(aCall, bCall)))
+
+      e <- extendException( "NewException", base=condition() )
+      got <- conditionCall( e )
+      expect_null( got )
+
+      e <- extendException( "NewException", base=condition( call= aCall ))
+      got <- conditionCall( e )
+      want <- aCall
+      expect_equal( got, want )
+
+      e <- extendException( "NewException", base=condition(), call= bCall)
+      got <- conditionCall( e )
+      want <- bCall
+      expect_equal( got, want )
+
+      e <- extendException( "NewException", base=condition( call= aCall ), call= bCall)
+      got <- conditionCall( e )
+      want <- bCall
+      expect_equal( got, want )
+   })
+   it( "Extending an exception sets or overrides data arguments, if specified", {
+
+      e <- extendException( "NewException", base=condition(),
+                            arg1= "arg1 value", arg2= "arg2 value" )
+      got <- c(e$arg1, e$arg2, e$arg3)
+      want <- c("arg1 value", "arg2 value", NULL)
+      expect_equal( got, want )
+
+      ee <- extendException( "NewNewException", base=e )
+      got <- c(e$arg1, e$arg2, e$arg3)
+      want <- c("arg1 value", "arg2 value", NULL)
+      expect_equal( got, want )
+
+      ee <- extendException( "NewNewException", base=e, arg3= "arg3 value" )
+      got <- c(ee$arg1, ee$arg2, ee$arg3)
+      want <- c("arg1 value", "arg2 value", "arg3 value")
+      expect_equal( got, want )
+
+      ee <- extendException( "NewNewException", base=e, arg1= "new arg1 value" )
+      got <- c(ee$arg1, ee$arg2, ee$arg3)
+      want <- c("new arg1 value", "arg2 value", NULL)
+      expect_equal( got, want )
+
+      ee <- extendException( "NewNewException", base=e,
+                             arg1= "new arg1 value", arg3= "arg3 value" )
+      got <- c(ee$arg1, ee$arg2, ee$arg3)
+      want <- c("new arg1 value", "arg2 value", "arg3 value")
+      expect_equal( got, want )
+
+   })
+})
+
 describe( "Exception() object constructor", {
 
    defaultException <- Exception()
@@ -53,6 +150,7 @@ describe( "Exception() object constructor", {
 describe( "FileException() object constructor", {
 
    defaultException <- FileException( path="default" )
+
    messageException <- FileException( path="message", message= "a message" )
 
    aCallStack <- sys.calls()
@@ -64,7 +162,9 @@ describe( "FileException() object constructor", {
       expect_equal( class(    callException ), c('FileException', 'Exception', 'condition') )
    })
    it( "generates objects with the expected message content", {
-      expect_equal( conditionMessage( defaultException ),   'FileException' )
+      want <- paste0( 'File Exception: "default" (looking in: "', getwd(), '").')
+
+      expect_equal( conditionMessage( defaultException ),              want )
       expect_equal( conditionMessage( messageException ),       'a message' )
       expect_equal( conditionMessage(    callException ), 'Now with calls.' )
    })
