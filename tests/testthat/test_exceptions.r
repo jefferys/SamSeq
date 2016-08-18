@@ -26,7 +26,7 @@ describe( "condition() object constructor", {
 })
 
 describe( "Extending an exception with extendException()", {
-   it( "Extends the correct base class", {
+   it( "Extends to the correct class", {
       e <- extendException( "NewException", base=condition() )
       got <- class( e )
       want <- c("NewException", "condition")
@@ -40,6 +40,22 @@ describe( "Extending an exception with extendException()", {
       default <- extendException( "childException" )
       got <- class( default )
       want <- c("childException", "Exception", "condition")
+      expect_equal( got, want )
+   })
+   it( "Extends to the correct class with multiple classes", {
+      e <- extendException( c("NewException1", "NewException2"), base=condition() )
+      got <- class( e )
+      want <- c("NewException1", "NewException2", "condition")
+      expect_equal( got, want )
+
+      ee <- extendException( c("newNewException1", "newNewException2"), base= e )
+      got <- class( ee )
+      want <- c("newNewException1", "newNewException2", "NewException1", "NewException2", "condition")
+      expect_equal( got, want )
+
+      default <- extendException( c("childException1", "childException2" ))
+      got <- class( default )
+      want <- c("childException1", "childException2", "Exception", "condition")
       expect_equal( got, want )
    })
    it( "Extending an exception overrides the message, if specified", {
@@ -118,7 +134,6 @@ describe( "Extending an exception with extendException()", {
       got <- c(ee$arg1, ee$arg2, ee$arg3)
       want <- c("new arg1 value", "arg2 value", "arg3 value")
       expect_equal( got, want )
-
    })
 })
 

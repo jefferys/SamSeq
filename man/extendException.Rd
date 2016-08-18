@@ -8,8 +8,8 @@ extendException(exception, base = Exception(), message = NULL,
   call = NULL, ...)
 }
 \arguments{
-\item{exception}{A one-element character vector giving the new exception's
-class name.}
+\item{exception}{A character vector giving the new exception's
+class name. Usually just the child class, but can be a vector of children.}
 
 \item{base}{An existing exception to base this exception off of. Often
 constructed in-line to provide needed parameters. By default this is the
