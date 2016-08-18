@@ -177,7 +177,7 @@ describe( "FileException() object constructor", {
       expect_equal( class(    callException ), c('FileException', 'Exception', 'condition') )
    })
    it( "generates objects with the expected message content", {
-      want <- paste0( 'File Exception: "default" (looking in: "', getwd(), '").')
+      want <- paste0( 'File Exception: "default". (Running in: "', getwd(), '").')
 
       expect_equal( conditionMessage( defaultException ),              want )
       expect_equal( conditionMessage( messageException ),       'a message' )
@@ -212,10 +212,10 @@ describe( "FileNotFoundException() object constructor", {
                     c('FileNotFoundException', 'FileException', 'Exception', 'condition') )
    })
    it( "generates objects with the expected message content", {
-      want <- paste0( 'File not found: "default" (looking in: "', getwd(), '").')
+      want <- paste0( 'File not found: "default". (Running in: "', getwd(), '").')
       expect_equal( conditionMessage( defaultException ),        want )
       expect_equal( conditionMessage( messageException ), 'a message' )
-      want <- paste0( 'File not found: "call" (looking in: "', getwd(), '").')
+      want <- paste0( 'File not found: "call". (Running in: "', getwd(), '").')
       expect_equal( conditionMessage(    callException ), want )
    })
    it( "generates objects with the expected calls content", {

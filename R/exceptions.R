@@ -62,7 +62,7 @@ Exception <- function ( message='Exception', call= NULL, ... ) {
 FileException <- function ( path, message=NULL, call= NULL, ... ) {
    if (is.null(path)) {path <- "<path not specified>"}
    if (is.null(message)) {
-      message=paste0( "File Exception: \"", path, "\" (looking in: \"", getwd(), "\").")
+      message=paste0( "File Exception: \"", path, "\". (Running in: \"", getwd(), "\").")
    }
    extendException( "FileException", base= Exception(),
                     message=message, call=call, path= path, ... )
@@ -71,7 +71,7 @@ FileException <- function ( path, message=NULL, call= NULL, ... ) {
 #' @rdname Exception
 #' @export
 FileNotFoundException <- function ( path,
-   message= paste0( "File not found: \"", path, "\" (looking in: \"", getwd(), "\")." ),
+   message= paste0( "File not found: \"", path, "\". (Running in: \"", getwd(), "\")." ),
    call= NULL, ...
 ) {
    extendException( "FileNotFoundException", base= FileException(path),

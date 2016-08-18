@@ -14,7 +14,7 @@ Exception(message = "Exception", call = NULL, ...)
 FileException(path, message = NULL, call = NULL, ...)
 
 FileNotFoundException(path, message = paste0("File not found: \\"", path,
-  "\\" (looking in: \\"", getwd(), "\\")."), call = NULL, ...)
+  "\\". (Running in: \\"", getwd(), "\\")."), call = NULL, ...)
 }
 \arguments{
 \item{message}{The message associated with the exception. Generally should be
