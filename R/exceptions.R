@@ -1,146 +1,275 @@
 # Exceptions.R - Exceptions and associated routines
 #
-# Probably should be split out as a separate package at some point, but
-# needs some work involving non-stantdard evaluations a-la assertthat
+# Probably should be split out as a separate package at some point, but needs
+# some work involving functionals and non-stantdard evaluations a-la assertthat
 # https://github.com/hadley/assertthat and some work on easier creation of
 # exception class hierarchies. non-standard evaluation can help both with
 # bundling tests and the exception they throw and in handling exception
 # parameters.
 
-#' Create exception condition objects.
+#' Create a condition object.
 #'
-#' Creates exception condition object of various classes. Exceptions come in
-#' hierarchies to allow handling any exception in a group. All exceptions
-#' inherit from condition, and hence have a message (accessible with
-#' \code{conditionMessage}) and a call,() usually NULL, accessible with
-#' \code{conditionCall}). However the base class should be considered to be
-#' "Exception". Some exceptions have additional required parameters, such as
-#' FileException, which requires a \code{path} parameter. These parameters are
-#' required in all child exceptions too.
+#' Create an S3 object of class \code{"condition"} for use in \code{R}'s
+#' condition handling system and as a base class for an exception class hierarchy.
 #'
-#' You can call stop, warning, and message on any exception object, and catch
-#' the exception with a try/catch condition handler.
+#' @param message A one-element character vector describing this
+#'   condition/event. By default this is \code{"condition"}. It is fine to set
+#'   this NULL as some subclasess will not need it (i.e. an extension class
+#'   that only holds named data.)
 #'
-#' If exceptions are visible to users (because they were signaled by an
-#' exception passed to stop, warning, message, etc) these are part of a packages
-#' public API just like function calls. They should be clearly documented and
-#' generally can be changed only in a backward-compatible manner. User code that
-#' catches exceptions depend on them being thrown with the same class name and
-#' having both the same parent classes and the same extra parameters.
+#' @param call The call or calls that were in process when this condition or
+#'   event was generated. By default this is \code{NULL} as conditions need not
+#'   be code related events (e.g. may be due to events triggered by
+#'   environmental conditions or timers, etc.). \code{sys.calls()} can be used
+#'   to obtain the whole call stack, and \code{sys.call()} can be used to access
+#'   a single call.
 #'
-#' @param message The message associated with the exception. Generally should be
-#'   more informative than just the exception class name, which is used by
-#'   default in base exception classes.
-#' @param call The call stack at the point where this exception was constructed.
-#'   Generally this is not provided (it is \code{NULL}) as the message should be
-#'   informative, not just a call stack trace.
-#' @param path The path associated with a FileException.
+#' @return A condition object, of class "condition".
 #'
-#' @return An exception object in the class hierarchy:
-#' \itemize{
-#' \item{\code{                                                 condition}}
-#' \item{\code{                                      Exception, condition}}
-#' \item{\code{                       FileException, Exception, condition}}
-#' \item{\code{FileNotFoundException, FileException, Exception, condition}}
+#' @examples
+#' e <- condition()
+#' conditionMessage( e )
+#' conditionCall( e )
+#'
+#' cond <- condition( "Something happened.", call= sys.calls() )
+#'
+#' \dontrun{
+#'    # Catch a "condition" class error and turn it into a warning instead.
+#'    tryCatch(
+#'         { stop(cond) },
+#'         condition= function(e) { warning(e) }
+#'    )
 #' }
-#'
-#' @name Exception
 #' @export
-condition <- function( message= "condition", call= NULL ) {
-   structure( class= "condition",
+condition <- function( message= 'condition', call= NULL ) {
+   structure( class= c("condition"),
               list( message= message, call= call ))
 }
 
-#' @rdname Exception
+#' Create a base Exception object.
+#'
+#' The generated \code{Exception} object is a subclass of
+#' \code{\link{condition}}. It describes an anomalous event and is intended to
+#' be the basis of a hierarchy of exception classes. Exceptions are signaled by
+#' calling \code{\link{stop}}, \code{\link{warning}}, or \code{\link{message}}
+#' on an \code{Exception} or \code{Exception}-derived object and can be caught
+#' individually or in groups using try/catch signal handlers. \code{Exception}
+#' objects inherit the \code{message} and \code{call} fields from
+#' \code{\link{condition}} and add a \code{package} field that
+#' describes what package this exception event happened in. They also add any
+#' unused \code{\var{argName}= \var{value}} arguments as extra data, storing
+#' this inside the exception object for internal use.
+#'
+#' @section Extra data:
+#'   Data provided through extra arguments are accessible by treating an
+#'   \code{Exception} as a list. This is intended to be used only internally in
+#'   the package or script that signaled the \code{Exception}. If data is
+#'   included for use by handlers in external code (from other packages or
+#'   users), S3 accessors should be defined. Similarly, external code should
+#'   never need to include extra data in exceptions for use by internal code.
+#'   Custom exception generating functions with appropriate arguments should be
+#'   exported. See \code{\link{extendException}}.
+#'
+#' @section Exceptions are part of your API:
+#'   If exceptions are visible to users they are part of that functions public
+#'   API just like arguments are. Any exception that a function signals by e.g.
+#'   \code{\link{stop}}, \code{\link{warning}}, \code{\link{message}}, etc, that
+#'   are not handled within that function are visible to users. These should be
+#'   clearly documented and generally can be changed only in a
+#'   backward-compatible manner. User code that catches exceptions will depend
+#'   on them being thrown with the same class name and having both the same
+#'   parent classes and the same accessible data, if any. Defining custom
+#'   exception classes and using S3 accessors for any data makes this easier.
+#'
+#' @param message
+#'   The message associated with the exception. By default this is \code{"An
+#'   Exception occurred."}. \code{conditionMessage(e)} is over-riden for
+#'   \code{Exception} and its extensions so that most of the time the
+#'   name of package where the exception was generated will be prepended upon
+#'   access, making the message appear to be \code{"[\var{package}]
+#'   \var{message}"}.
+#' @param call
+#'   The call or call stack associated with the exception. By default this is
+#'   the list returned by calling \code{\link{sys.calls}} at the point where
+#'   this object was constructed. Set \code{NULL} when an exception does not
+#'   involve code, or with \code{\link{sys.call}} when only a specific code line
+#'   is involved.
+#' @param package
+#'   The package where this exception is generated; tries to guess this by
+#'   default. When not called from within a package, this will likely be
+#'   \code{NULL}, e.g. when exceptions are constructed interactively or from
+#'   script. If given or guessed and not \code{NULL}, the package is
+#'   automatically prepended to the message.
+#' @param ...
+#'   Additional arguments defining \code{\var{key}=\var{value}} data to include
+#'   in the object. These are accessible by treating the generated exception as
+#'   a list.
+#' @param e
+#'    An exception object to query for a message, will prepend '\code{[\var{package}]}'
+#'    if the exception was generated from some package's code.
+#'
+#' @return \code{Exception} returns an \code{Event} object, which is an object
+#'   of class \code{c("Exception", "condition")} describing some problematic
+#'   event, usually signaled from within a package e.g. with \code{\link{stop}}.
+#'
+#'   \code{conditionMessage} called on a \code{Exception} object returns the message
+#'   associated with that exception, with the \code{package} of the exception
+#'   prepended.
+#'
+#' @seealso \code{\link{condition}}, \code{\link{conditionMessage}},
+#'   \code{\link{conditionCall}}, \code{\link{exceptionPackage}, \code{\link{tryCatch}}}
+#'
+#' @examples
+#' e <- Exception()
+#' conditionMessage(e)
+#' conditionCall(e)
+#' exceptionPackage(e)
+#'
+#' e <- Exception( "Extra data included", x=1, y=2, z=list(A=1, B="two") )
+#' x <- e$x
+#' y <- e$y
+#' z <- e$z
+#'
+#' \dontrun{
+#'   stop(Exception( "Oops, that didn't work." ))
+#'
+#'   # Convert a fatal Exception into a waning.
+#'   e <- Exception( "Lying about the package", package="NotMine" )
+#'   tryCatch( stop(e), Exception= function(e) {warning(e)})
+#' }
+#'
 #' @export
-Exception <- function ( message='Exception', call= NULL, ... ) {
-   extendException( "Exception", base= condition(), message=message, call=call, ... )
+Exception <- function ( message= 'An Exception occurred.',
+   call= sys.calls(), package= packageName(), ...
+) {
+   structure(
+      class= c("Exception","condition"),
+      merge.list(
+         list(message=message, call=call, package=package),
+         list(...)
+      )
+   )
 }
 
 #' @rdname Exception
 #' @export
-FileException <- function ( path, message=NULL, call= NULL, ... ) {
-   if (is.null(path)) {path <- "<path not specified>"}
-   if (is.null(message)) {
-      message=paste0( "File Exception: \"", path, "\". (Running in: \"", getwd(), "\").")
+conditionMessage.Exception <- function(e) {
+   if (is.character(e$package) && nchar(e$package) > 0) {
+      return( paste0( '[', e$package, '] ', e$message ))
    }
-   extendException( "FileException", base= Exception(),
-                    message=message, call=call, path= path, ... )
+   else {
+      return( e$message )
+   }
 }
 
-#' @rdname Exception
+#' Access the package data in an Exception
+#'
+#' An S3 method to extract the package in which an Exception occurred. Can be
+#' applied to any Exception derived object, but there is no default version.
+#'
+#' @param e The Exception object to query
+#' @param ... Future-proof the S3 generic method; not used here.
+#' @return The package where the \code{Exception} was generated.
+#'
+#' @seealso \code{Exception}
+#'
+#' @examples
+#' e <- Exception()
+#' package <- exceptionPackage(e)
+#'
+#' e <- IOException()
+#' package <- exceptionPackage(e)
+#'
 #' @export
-FileNotFoundException <- function ( path,
-   message= paste0( "File not found: \"", path, "\". (Running in: \"", getwd(), "\")." ),
-   call= NULL, ...
-) {
-   extendException( "FileNotFoundException", base= FileException(path),
-                    message= message, call= call, ... )
+exceptionPackage <- function (...) {
+   UseMethod( "exceptionPackage" )
 }
 
-#' Get the path associated with a file system exception.
-#'
-#' @param e The file system exception to query
-#'
-#' @return The path of the thing a file system exception is referring to as a 1
-#'   element character vector.
-#'
-#' @seealso FileSystemException, conditionMessage, conditionCall
-#'
+#' @rdname exceptionPackage
 #' @export
-path <- function (...) {
-   UseMethod( "path" )
-}
+exceptionPackage.Exception <- function (e, ...) { return (e$package) }
 
-#' @rdname path
-#' @export
-path.FileException <- function (e, ...) { return (e$path) }
-
-#' Create a new exception that inherits from an existing one.
+#' Create a new exception from an existing one.
 #'
-#' This is used to create exception constructors. Exceptions are based off of an
-#' existing exception, usually constructed inline. This base exception is then
-#' used to create a new exception. The message, call, and and data properties
-#' are copied into the new exception, but can be over-ridden by any new message,
-#' call or data properties specified. Essentially any \code{name= value}
-#' properties can be included by specifying them as arguments, except for the
-#' already-used argument names \code{exception}, \code{base}, \code{message},
-#' and \code{call}
+#' This is used mainly to create exception constructors. Given a base exception,
+#' this builds a new exception based on it. The base exception is usually
+#' constructed inline as the \code{message}, \code{call}, \code{package}, and
+#' any data properties in the new exception are inherited from the base
+#' exception. They can only be set when the base exception is constructed and
+#' can not be overriden by this extension constructor. The new exception can
+#' have any additional specified exception class(es), but will also inherit the
+#' classes of the base exception.
 #'
-#' @section Efficiency considerations: Building child class instances using
-#'   parent class instances is not normally done in \R due to its copy-by-value
-#'   semantics. However questions involving the efficiency of even a
-#'   relatively long chain of exceptions built using nested calls to
-#'   \code{extendException} are irrelevant because exceptions should be
-#'   generated rarely and not used for routine flow control.
+#' It is not recommended to use \code{"extendException"} to directly create new
+#' exceptions unless those exceptions are documented and used only in one place.
+#' Repeatedly constructing the same class of exception is the job of a
+#' constructor function, and an exception constructor function provides an
+#' obvious place to put documentation.
 #'
-#' @param exception A character vector giving the new exception's
-#'   class name. Usually just the child class, but can be a vector of children.
-#' @param base An existing exception to base this exception off of. Often
-#'   constructed in-line to provide needed parameters. By default this is the
+#' @param exception The new exception's class (name). Usually just a single
+#'   class, but can be a vector of classes. This is prepended to the class
+#'   vector of the \code{base} exception to create the complete class of the
+#'   new exception
+#' @param base An existing exception to base a new exception on. Often
+#'   constructed in-line to allow setting parameters. By default this is the
 #'   exception generated by a no-parameter call to "Exception()."
-#' @param message The message for this exception, by default the message from
-#'   the base exception which is used when this is \code{NULL}.
-#' @param call The call parameter for this exception, by default the call from
-#'   the base exception which is used when this is \code{NULL}.
-#' @param ... name= value parameters that will be included in exception generated
-#'   and will be accessible as list elements, i.e. <exception>$<name> == <value>
-#'   This will replace any data elements of the same name from base exceptions.
-#'   The arguments \code{exception}, \code{base}, \code{message}, and
-#'   \code{call} already have meaning and can't be re-used.
 #'
-#' @return A new exception class inheriting the class hierarchy of the \code{base=}
-#' exception, and any of that classes data elements, but with new message and
-#' call elements, and any additional data elements specified.
+#' @return \code{extendException} returns a new exception class inheriting the
+#'   \code{message}, \code{call}, and class hierarchy of the \code{base=}
+#'   exception, and all of that base class's data elements.
+#'
+#' @examples
+#' # Function to create a new FruitException
+#' FruitException <- function( fruit,
+#'     message= sprintf("Sorry, %s is a fruit", fruit),
+#'     call=NULL, package= packageName(), ...
+#' ){
+#'    e <- extendException( c("FruitException", "PedanticException"),
+#'       base= Exception( message=message, call= call, package= package,
+#'          fruit= fruit, ...)
+#'    )
+#'    return(e)
+#' }
+#'
+#' fEx <- FruitException( fruit= "tomato" )
+#' inherits(fEx, "FruitException")
+#' inherits(fEx, "PedanticException")
+#' inherits(e, "Exception")
+#' inherits(e, "condition")
+#' fEx$fruit == "tomato"   # Internal use only
+#'
+#' # Making fruit accessible by external users.
+#' exceptionFruit <- function(...)  UseMethod( "exceptionFruit" )
+#' exceptionFruit.Exception(e, ...) e$fruit
+#'
+#' exceptionFruit( fEx )
+#'
+#' # Will work for any Exception derived object
+#' ex <- Exception( fruit= "Green Pepper", package="testing" )
+#' exceptionFruit( ex ) == ex$fruit
+#' conditionMessage( ex ) == "[testing] An Exception occurred."
+#'
+#' # Can use data variables in messages
+#' ex <- Exception( message= paste0( "I hate ", fruit ),
+#'    fruit= "Green Pepper", package="testing")
+#' conditionMessage( ex ) == "[testing] I hate Green Pepper."
+#'
+#' \dontrun{
+#'    # User putting in extra data for internal use
+#'    withComplainerFEx <- FruitException( fruit= "tomato", complainer= "Bob")
+#'    tryCatch(
+#'       { stop(withComplainerFEx) },
+#'       FruitException= function(e) {
+#'          if (e$complainer == "Bob") {
+#'             message(paste0( "Ignoring Bob's complaint: \"",
+#'                             conditionMessage(e), "\"" ))
+#'          }
+#'       }
+#'    )
+#' }
 #'
 #' @export
-extendException <- function( exception,
-   base= Exception(), message= NULL, call= NULL, ...
-) {
-   objClass <- c(exception, class(base))
-   objList <- as.list(base)
-   if ( ! is.null( message )) { objList$message <- message }
-   if ( ! is.null(    call )) { objList$call    <- call    }
-   objList <- merge.list( objList, list( ... ))  # Handles empty list(...) correctly
-   structure( class= objClass, objList)
+extendException <- function( exception, base= Exception() ) {
+   class(base) <- c(exception, class(base))
+   return(base)
 }

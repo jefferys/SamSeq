@@ -24,208 +24,161 @@ describe( "condition() object constructor", {
       expect_equal( conditionCall( callCondition ), aCallStack )
    })
 })
+describe( "Exception() object constructor and accessors", {
 
+   defaultException <- Exception()
+   messageException <- Exception( message= "a message" )
+   packageException <- Exception( message= "a package", package="Bob" )
+
+   aCallStack <- sys.calls()
+   callException <- Exception( message="Now without calls.", call= NULL, package= NULL)
+
+   xVec <- c(1,2)
+   yList <- list(A=1,B=list(C=1, D=2))
+   dataException <- Exception( message="With X and Y", X=xVec, Y=yList )
+
+   it( "generates objects with expected class hierarchy", {
+      want <- c('Exception', 'condition')
+      expect_equal( class( defaultException ), want )
+      expect_equal( class( messageException ), want )
+      expect_equal( class( packageException ), want )
+      expect_equal( class(    callException ), want )
+      expect_equal( class(    dataException ), want )
+   })
+   it( "generates objects with expected accessible internal data", {
+      expect_equal( defaultException$message, 'An Exception occurred.' )
+      expect_equal( messageException$message, 'a message' )
+      expect_equal( packageException$message, 'a package' )
+      expect_equal( callException$message, 'Now without calls.' )
+      expect_equal( dataException$message, 'With X and Y' )
+      expect_equal( defaultException$call[1:length(aCallStack)], aCallStack[] )
+      expect_equal( messageException$call[1:length(aCallStack)], aCallStack[] )
+      expect_equal( packageException$call[1:length(aCallStack)], aCallStack[] )
+      expect_null( callException$call )
+      expect_equal( dataException$call[1:length(aCallStack)], aCallStack[] )
+      expect_equal( defaultException$package, 'SamSeq' )
+      expect_equal( messageException$package, 'SamSeq' )
+      expect_equal( packageException$package, 'Bob' )
+      expect_null( callException$package )
+      expect_equal( dataException$package, 'SamSeq' )
+      expect_null( defaultException$X )
+      expect_null( defaultException$Y )
+      expect_null( messageException$X )
+      expect_null( messageException$Y )
+      expect_null( packageException$X )
+      expect_null( packageException$Y )
+      expect_null( callException$X )
+      expect_null( callException$Y )
+      expect_equal( dataException$X, xVec )
+      expect_equal( dataException$Y, yList )
+   })
+   it( "generates objects with the expected conditionMessage() message content", {
+      expect_equal( conditionMessage( defaultException ), '[SamSeq] An Exception occurred.' )
+      expect_equal( conditionMessage( messageException ), '[SamSeq] a message' )
+      expect_equal( conditionMessage( packageException ), '[Bob] a package' )
+      expect_equal( conditionMessage(    callException ), 'Now without calls.' )
+   })
+   it( "generates objects with the expected conditionCall() call content", {
+      # aCallStack[] is required as subseting pairlists converts them to lists...
+      expect_equal( conditionCall( defaultException )[1:length(aCallStack)], aCallStack[] )
+      expect_equal( conditionCall( messageException )[1:length(aCallStack)], aCallStack[] )
+      expect_equal( conditionCall( packageException )[1:length(aCallStack)], aCallStack[] )
+      expect_null(  conditionCall( callException ))
+   })
+   it( "generates objects with the expected exceptionPackage() package content", {
+      expect_equal( exceptionPackage( defaultException ), 'SamSeq' )
+      expect_equal( exceptionPackage( messageException ), 'SamSeq' )
+      expect_equal( exceptionPackage( packageException ), 'Bob' )
+      expect_null(  exceptionPackage( callException    ))
+   })
+})
 describe( "Extending an exception with extendException()", {
    it( "Extends to the correct class", {
-      e <- extendException( "NewException", base=condition() )
+      e <- extendException( "ChildException" )
       got <- class( e )
-      want <- c("NewException", "condition")
+      want <- c("ChildException", "Exception", "condition")
+      expect_equal( got, want )
+
+      ee <- extendException( "NewException", base=e )
+      got <- class( ee )
+      want <- c("NewException", "ChildException", "Exception", "condition")
+      expect_equal( got, want )
+
+   })
+   it( "Extends to the correct class with multiple classes", {
+
+      e <- extendException( c( "NewException1", "NewException2" ))
+      got <- class( e )
+      want <- c("NewException1", "NewException2", "Exception", "condition")
+      expect_equal( got, want )
+
+      ee <- extendException( c("newNewException1", "newNewException2"), base=e )
+      got <- class( ee )
+      want <- c("newNewException1", "newNewException2",
+                "NewException1", "NewException2", "Exception", "condition")
+      expect_equal( got, want )
+
+   })
+   it( "Extending an exception retains or overides the base message.", {
+      e <- extendException( "NewException", base=Exception() )
+      got <- conditionMessage( e )
+      want <- '[SamSeq] An Exception occurred.'
+      expect_equal( got, want )
+
+      e <- extendException( "NewException", base=Exception("New message.") )
+      got <- conditionMessage( e )
+      want <- '[SamSeq] New message.'
+      expect_equal( got, want )
+   })
+   it( "Can over-ride package", {
+      e <- extendException( "NewException", Exception(package= "testPackageException" ))
+      got <- exceptionPackage( e )
+      want <- "testPackageException"
+      expect_equal( got, want )
+      got <- conditionMessage( e )
+      want <- '[testPackageException] An Exception occurred.'
       expect_equal( got, want )
 
       ee <- extendException( "newNewException", base= e )
-      got <- class( ee )
-      want <- c("newNewException", "NewException", "condition")
+      got <- exceptionPackage( ee )
+      want <- "testPackageException"
       expect_equal( got, want )
-
-      default <- extendException( "childException" )
-      got <- class( default )
-      want <- c("childException", "Exception", "condition")
+      got <- conditionMessage( ee )
+      want <- '[testPackageException] An Exception occurred.'
       expect_equal( got, want )
-   })
-   it( "Extends to the correct class with multiple classes", {
-      e <- extendException( c("NewException1", "NewException2"), base=condition() )
-      got <- class( e )
-      want <- c("NewException1", "NewException2", "condition")
-      expect_equal( got, want )
-
-      ee <- extendException( c("newNewException1", "newNewException2"), base= e )
-      got <- class( ee )
-      want <- c("newNewException1", "newNewException2", "NewException1", "NewException2", "condition")
-      expect_equal( got, want )
-
-      default <- extendException( c("childException1", "childException2" ))
-      got <- class( default )
-      want <- c("childException1", "childException2", "Exception", "condition")
-      expect_equal( got, want )
-   })
-   it( "Extending an exception overrides the message, if specified", {
-      e <- extendException( "NewException", base=condition() )
-      got <- conditionMessage( e )
-      want <- "condition"
-      expect_equal( got, want )
-
-      e <- extendException( "NewException", base=condition("Inherited message") )
-      got <- conditionMessage( e )
-      want <- "Inherited message"
-      expect_equal( got, want )
-
-      e <- extendException( "NewException", base=condition(),
-                            message= "New Exception message" )
-      got <- conditionMessage( e )
-      want <- "New Exception message"
-      expect_equal( got, want )
-
-      e <- extendException( "NewException", base=condition("Inherited message"),
-                            message= "New Exception message" )
-      got <- conditionMessage( e )
-      want <- "New Exception message"
-      expect_equal( got, want )
-
    })
    it( "Extending an exception overrides the call, if specified", {
-      aCall <- sys.call()
-      bCall <- sys.calls()
-      expect_false( isTRUE(all.equal(aCall, bCall)))
+      calls <- sys.calls()
 
-      e <- extendException( "NewException", base=condition() )
-      got <- conditionCall( e )
-      expect_null( got )
-
-      e <- extendException( "NewException", base=condition( call= aCall ))
-      got <- conditionCall( e )
-      want <- aCall
+      e <- extendException( "NewException", base=Exception() )
+      want <- calls[]
+      got <- conditionCall( e )[1:length(want)]
       expect_equal( got, want )
 
-      e <- extendException( "NewException", base=condition(), call= bCall)
-      got <- conditionCall( e )
-      want <- bCall
+      ee <- extendException( "NewNewException", base=e )
+      want <- calls[]
+      got <- conditionCall( ee )[1:length(want)]
       expect_equal( got, want )
 
-      e <- extendException( "NewException", base=condition( call= aCall ), call= bCall)
-      got <- conditionCall( e )
-      want <- bCall
-      expect_equal( got, want )
+      e <- extendException( "NewException", base=Exception( call= NULL ))
+      expect_null( conditionCall( e ))
+
+      ee <- extendException( "NewNewException", base=e )
+      expect_null( conditionCall( ee ))
+
    })
    it( "Extending an exception sets or overrides data arguments, if specified", {
 
-      e <- extendException( "NewException", base=condition(),
-                            arg1= "arg1 value", arg2= "arg2 value" )
+      e <- extendException( "NewException", base=Exception(
+                            arg1= "arg1 value", arg2= "arg2 value" ))
       got <- c(e$arg1, e$arg2, e$arg3)
       want <- c("arg1 value", "arg2 value", NULL)
       expect_equal( got, want )
 
       ee <- extendException( "NewNewException", base=e )
-      got <- c(e$arg1, e$arg2, e$arg3)
+      got <- c(ee$arg1, ee$arg2, ee$arg3)
       want <- c("arg1 value", "arg2 value", NULL)
       expect_equal( got, want )
 
-      ee <- extendException( "NewNewException", base=e, arg3= "arg3 value" )
-      got <- c(ee$arg1, ee$arg2, ee$arg3)
-      want <- c("arg1 value", "arg2 value", "arg3 value")
-      expect_equal( got, want )
-
-      ee <- extendException( "NewNewException", base=e, arg1= "new arg1 value" )
-      got <- c(ee$arg1, ee$arg2, ee$arg3)
-      want <- c("new arg1 value", "arg2 value", NULL)
-      expect_equal( got, want )
-
-      ee <- extendException( "NewNewException", base=e,
-                             arg1= "new arg1 value", arg3= "arg3 value" )
-      got <- c(ee$arg1, ee$arg2, ee$arg3)
-      want <- c("new arg1 value", "arg2 value", "arg3 value")
-      expect_equal( got, want )
-   })
-})
-
-describe( "Exception() object constructor", {
-
-   defaultException <- Exception()
-   messageException <- Exception( message= "a message" )
-
-   aCallStack <- sys.calls()
-   callException <- Exception( message="Now with calls.", call= aCallStack)
-
-   it( "generates  'condition' class object", {
-      expect_equal( class( defaultException ), c('Exception', 'condition') )
-      expect_equal( class( messageException ), c('Exception', 'condition') )
-      expect_equal( class(    callException ), c('Exception', 'condition') )
-   })
-   it( "generates objects with the expected message content", {
-      expect_equal( conditionMessage( defaultException ),       'Exception' )
-      expect_equal( conditionMessage( messageException ),       'a message' )
-      expect_equal( conditionMessage(    callException ), 'Now with calls.' )
-   })
-   it( "generates objects with the expected calls content", {
-      expect_null(  conditionCall( defaultException ))
-      expect_null(  conditionCall( messageException ))
-      expect_equal( conditionCall( callException ), aCallStack )
-   })
-})
-
-describe( "FileException() object constructor", {
-
-   defaultException <- FileException( path="default" )
-
-   messageException <- FileException( path="message", message= "a message" )
-
-   aCallStack <- sys.calls()
-   callException <- FileException( path= "call", message="Now with calls.", call= aCallStack)
-
-   it( "generates  'condition' class object", {
-      expect_equal( class( defaultException ), c('FileException', 'Exception', 'condition') )
-      expect_equal( class( messageException ), c('FileException', 'Exception', 'condition') )
-      expect_equal( class(    callException ), c('FileException', 'Exception', 'condition') )
-   })
-   it( "generates objects with the expected message content", {
-      want <- paste0( 'File Exception: "default". (Running in: "', getwd(), '").')
-
-      expect_equal( conditionMessage( defaultException ),              want )
-      expect_equal( conditionMessage( messageException ),       'a message' )
-      expect_equal( conditionMessage(    callException ), 'Now with calls.' )
-   })
-   it( "generates objects with the expected calls content", {
-      expect_null(  conditionCall( defaultException ))
-      expect_null(  conditionCall( messageException ))
-      expect_equal( conditionCall( callException ), aCallStack )
-   })
-   it( "generates objects with the expected path content", {
-      expect_equal( path( defaultException ), "default" )
-      expect_equal( path( messageException ), "message" )
-      expect_equal( path(    callException ),    "call" )
-   })
-})
-
-describe( "FileNotFoundException() object constructor", {
-
-   defaultException <- FileNotFoundException( path="default" )
-   messageException <- FileNotFoundException( path="message", message= "a message" )
-
-   aCallStack <- sys.calls()
-   callException <- FileNotFoundException( path= "call", call= aCallStack)
-
-   it( "generates  'condition' class object", {
-      expect_equal( class( defaultException ),
-                    c('FileNotFoundException', 'FileException', 'Exception', 'condition') )
-      expect_equal( class( messageException ),
-                    c('FileNotFoundException', 'FileException', 'Exception', 'condition') )
-      expect_equal( class(    callException ),
-                    c('FileNotFoundException', 'FileException', 'Exception', 'condition') )
-   })
-   it( "generates objects with the expected message content", {
-      want <- paste0( 'File not found: "default". (Running in: "', getwd(), '").')
-      expect_equal( conditionMessage( defaultException ),        want )
-      expect_equal( conditionMessage( messageException ), 'a message' )
-      want <- paste0( 'File not found: "call". (Running in: "', getwd(), '").')
-      expect_equal( conditionMessage(    callException ), want )
-   })
-   it( "generates objects with the expected calls content", {
-      expect_null(  conditionCall( defaultException ))
-      expect_null(  conditionCall( messageException ))
-      expect_equal( conditionCall( callException ), aCallStack )
-   })
-   it( "generates objects with the expected path content", {
-      expect_equal( path( defaultException ), "default" )
-      expect_equal( path( messageException ), "message" )
-      expect_equal( path(    callException ),    "call" )
    })
 })

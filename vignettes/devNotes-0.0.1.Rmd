@@ -19,9 +19,12 @@ Since I'm building a file step by step and checking each with a validator, I'm g
 
 #### Base exception hierarchy; reusable part of validation.
 
-Need an implementation of named exceptions as all validation is then much easier.  Created a base exception hierarchy up through a usable generic exception,  ```FileNotFoundException``` which has to have an extra parameter, ```path=```.  This needs to be improved and split out as a separate package, possibly  including non-standard evaluation tricks like ```assertthat``` does. Construction of new exceptions should be based on data, not code, and that is hard due to the need to handle extra data parameters. As file *"exceptions.R"*
+Need an implementation of named exceptions as all validation is then much easier.  Created a base exception hierarchy up through a usable generic exception,  ```FileNotFoundException``` which has to have an extra parameter, ```path=```.  This needs to be improved and split out as a separate package, possibly including non-standard evaluation tricks like ```assertthat``` does. Construction of new exceptions should be bundled with the test and based on data, not code; that is hard due to the need to handle extra data parameters. As file *"exceptions.R"*
+
 
 #### Local exception hierarchy; non-reusable part of validation.
+
+
 
 ### Reading in a sam file:
 1. File name must exist.

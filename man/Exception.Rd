@@ -2,59 +2,109 @@
 % Please edit documentation in R/exceptions.R
 \name{Exception}
 \alias{Exception}
-\alias{FileException}
-\alias{FileNotFoundException}
-\alias{condition}
-\title{Create exception condition objects.}
+\alias{conditionMessage.Exception}
+\title{Create a base Exception object.}
 \usage{
-condition(message = "condition", call = NULL)
+Exception(message = "An Exception occurred.", call = sys.calls(),
+  package = packageName(), ...)
 
-Exception(message = "Exception", call = NULL, ...)
-
-FileException(path, message = NULL, call = NULL, ...)
-
-FileNotFoundException(path, message = paste0("File not found: \\"", path,
-  "\\". (Running in: \\"", getwd(), "\\")."), call = NULL, ...)
+\method{conditionMessage}{Exception}(e)
 }
 \arguments{
-\item{message}{The message associated with the exception. Generally should be
-more informative than just the exception class name, which is used by
-default in base exception classes.}
+\item{message}{The message associated with the exception. By default this is \code{"An
+Exception occurred."}. \code{conditionMessage(e)} is over-riden for
+\code{Exception} and its extensions so that most of the time the
+name of package where the exception was generated will be prepended upon
+access, making the message appear to be \code{"[\var{package}]
+\var{message}"}.}
 
-\item{call}{The call stack at the point where this exception was constructed.
-Generally this is not provided (it is \code{NULL}) as the message should be
-informative, not just a call stack trace.}
+\item{call}{The call or call stack associated with the exception. By default this is
+the list returned by calling \code{\link{sys.calls}} at the point where
+this object was constructed. Set \code{NULL} when an exception does not
+involve code, or with \code{\link{sys.call}} when only a specific code line
+is involved.}
 
-\item{path}{The path associated with a FileException.}
+\item{package}{The package where this exception is generated; tries to guess this by
+default. When not called from within a package, this will likely be
+\code{NULL}, e.g. when exceptions are constructed interactively or from
+script. If given or guessed and not \code{NULL}, the package is
+automatically prepended to the message.}
+
+\item{...}{Additional arguments defining \code{\var{key}=\var{value}} data to include
+in the object. These are accessible by treating the generated exception as
+a list.}
+
+\item{e}{An exception object to query for a message, will prepend '\code{[\var{package}]}'
+if the exception was generated from some package's code.}
 }
 \value{
-An exception object in the class hierarchy:
-\itemize{
-\item{\code{                                                 condition}}
-\item{\code{                                      Exception, condition}}
-\item{\code{                       FileException, Exception, condition}}
-\item{\code{FileNotFoundException, FileException, Exception, condition}}
-}
+\code{Exception} returns an \code{Event} object, which is an object
+  of class \code{c("Exception", "condition")} describing some problematic
+  event, usually signaled from within a package e.g. with \code{\link{stop}}.
+
+  \code{conditionMessage} called on a \code{Exception} object returns the message
+  associated with that exception, with the \code{package} of the exception
+  prepended.
 }
 \description{
-Creates exception condition object of various classes. Exceptions come in
-hierarchies to allow handling any exception in a group. All exceptions
-inherit from condition, and hence have a message (accessible with
-\code{conditionMessage}) and a call,() usually NULL, accessible with
-\code{conditionCall}). However the base class should be considered to be
-"Exception". Some exceptions have additional required parameters, such as
-FileException, which requires a \code{path} parameter. These parameters are
-required in all child exceptions too.
+The generated \code{Exception} object is a subclass of
+\code{\link{condition}}. It describes an anomalous event and is intended to
+be the basis of a hierarchy of exception classes. Exceptions are signaled by
+calling \code{\link{stop}}, \code{\link{warning}}, or \code{\link{message}}
+on an \code{Exception} or \code{Exception}-derived object and can be caught
+individually or in groups using try/catch signal handlers. \code{Exception}
+objects inherit the \code{message} and \code{call} fields from
+\code{\link{condition}} and add a \code{package} field that
+describes what package this exception event happened in. They also add any
+unused \code{\var{argName}= \var{value}} arguments as extra data, storing
+this inside the exception object for internal use.
 }
-\details{
-You can call stop, warning, and message on any exception object, and catch
-the exception with a try/catch condition handler.
+\section{Extra data}{
 
-If exceptions are visible to users (because they were signaled by an
-exception passed to stop, warning, message, etc) these are part of a packages
-public API just like function calls. They should be clearly documented and
-generally can be changed only in a backward-compatible manner. User code that
-catches exceptions depend on them being thrown with the same class name and
-having both the same parent classes and the same extra parameters.
+  Data provided through extra arguments are accessible by treating an
+  \code{Exception} as a list. This is intended to be used only internally in
+  the package or script that signaled the \code{Exception}. If data is
+  included for use by handlers in external code (from other packages or
+  users), S3 accessors should be defined. Similarly, external code should
+  never need to include extra data in exceptions for use by internal code.
+  Custom exception generating functions with appropriate arguments should be
+  exported. See \code{\link{extendException}}.
+}
+
+\section{Exceptions are part of your API}{
+
+  If exceptions are visible to users they are part of that functions public
+  API just like arguments are. Any exception that a function signals by e.g.
+  \code{\link{stop}}, \code{\link{warning}}, \code{\link{message}}, etc, that
+  are not handled within that function are visible to users. These should be
+  clearly documented and generally can be changed only in a
+  backward-compatible manner. User code that catches exceptions will depend
+  on them being thrown with the same class name and having both the same
+  parent classes and the same accessible data, if any. Defining custom
+  exception classes and using S3 accessors for any data makes this easier.
+}
+\examples{
+e <- Exception()
+conditionMessage(e)
+conditionCall(e)
+exceptionPackage(e)
+
+e <- Exception( "Extra data included", x=1, y=2, z=list(A=1, B="two") )
+x <- e$x
+y <- e$y
+z <- e$z
+
+\dontrun{
+  stop(Exception( "Oops, that didn't work." ))
+
+  # Convert a fatal Exception into a waning.
+  e <- Exception( "Lying about the package", package="NotMine" )
+  tryCatch( stop(e), Exception= function(e) {warning(e)})
+}
+
+}
+\seealso{
+\code{\link{condition}}, \code{\link{conditionMessage}},
+  \code{\link{conditionCall}}, \code{\link{exceptionPackage}, \code{\link{tryCatch}}}
 }
 
