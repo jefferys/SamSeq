@@ -45,3 +45,27 @@ merge.list <- function(x, y, keepOrder= FALSE) {
       return( append( x, y[! dropY]))
    }
 }
+
+#' Binary operator versions of paste and paste0
+#'
+#' @param x The first object to paste
+#' @param y The second object to paste
+#'
+#' @return Returns the result of pasting the two objects together:
+#' \preformatted{
+#'     x \%p\% y == paste0(x, y)
+#'     x \%pp\% y == paste(x, y)
+#' }
+#'
+#' @examples
+#' "Hello, " %p% "world!" == "Hello, world!"
+#' "Hello," %pp% "world!" == "Hello, world!"
+#' name <- "Amy"
+#' "Hello," %pp% name %p% "!" == "Hello, Amy!"
+#'
+#' @export
+`%p%` <- function(x, y) { paste0(x, y) }
+
+#' @rdname grapes-p-grapes
+#' @export
+`%pp%` <- function(x, y) { paste(x, y) }
