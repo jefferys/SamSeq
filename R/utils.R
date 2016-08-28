@@ -48,6 +48,10 @@ merge.list <- function(x, y, keepOrder= FALSE) {
 
 #' Binary operator versions of paste and paste0
 #'
+#' Like most operators, can split across lines with operator at front of second
+#' line only if inside parenthesis. Unlike most operators, this is pretty
+#' likely to happen. See Examples.
+#'
 #' @param x The first object to paste
 #' @param y The second object to paste
 #'
@@ -62,6 +66,13 @@ merge.list <- function(x, y, keepOrder= FALSE) {
 #' "Hello," %pp% "world!" == "Hello, world!"
 #' name <- "Amy"
 #' "Hello," %pp% name %p% "!" == "Hello, Amy!"
+#' "Hello," %pp%
+#'    "world!" == "Hello, world!"
+#' ("Hello,"
+#'     %pp% "world!") == "Hello, world!"
+#' # "Hello,"
+#' #    %pp% "world!" == "Hello, world!"
+#' # Error: unexpected SPECIAL in "     %pp%"
 #'
 #' @export
 `%p%` <- function(x, y) { paste0(x, y) }
@@ -69,3 +80,126 @@ merge.list <- function(x, y, keepOrder= FALSE) {
 #' @rdname grapes-p-grapes
 #' @export
 `%pp%` <- function(x, y) { paste(x, y) }
+
+#' Log to multiple loggers (with different thresholds)
+#'
+#' These are essentially the same as the level-specific loggers in
+#' \code{\link{futile.logger}}, except they each can take a vector of logger
+#' names. The \code{\link{futile.logger}} package makes it easy to log, and allows
+#' logging to both a file and the console, but not with different thresholds.
+#' The \code{say\var{Level}} loggers described here support this as the default
+#' case, but also support any combination of one or more loggers, possibly
+#' differing at each point where a message is logged.
+#'
+#' Whether or not a message is propagated depends on each logger's level
+#' separately. If only one name is specified, this is essentially identical to a
+#' \code{flog.\var{level}} call. If no names are provided, by default will log
+#' to two loggers: \code{"\var{package}.file"} and
+#' \code{"\var{package}.console"}.
+#'
+#' All loggers should be defined before being used in a log message. Since
+#' loggers are a hierarchical namespace based on the "." separator in the names,
+#' \emph{each} undefined logger passed in causes a logging call to search up the
+#' tree of loggers looking for a "fall-back" logger. As a last resort, this will
+#' be logged by the root logger. This prevents messages being lost, but can
+#' result in the same message being logged multiple times. To prevent a logger
+#' from logging anything, set its threshold to 0. Even FATAL errors are then
+#' ignored by that logger. Numerical constants seem fine; there is no matching
+#' named constant for 0. Perhaps this should be called "OFF"? To ensure a logger
+#' logs everything, set its logging threshold to "TRACE".
+#'
+#' @param msg The message to print, possibly a string with \code{\link{sprintf}}
+#'   symbols (like \code{\%s}), unless \code{capture= TRUE}
+#' @param name The logger names to use (a vector of strings). By default will
+#'   use \code{c( \var{package}.file, \var{package}.code )}. A message of the
+#'   appropriate level with be logged to each.
+#' @param ... Extra arguments for use by \code{msg}, if it is a sprintf message
+#'   (\code{capture= FALSE}), or objects to have the logger format and print
+#'   starting on the line following a non-sprintf message. (\code{capture=
+#'   TRUE}.)
+#' @param capture By default (FALSE), extra object arguments are handled as
+#'   format variables for the message, which should contain a matching number of
+#'   sprintf variable symbols. If TRUE, then extra object arguments are handled
+#'   by the appender layout, by default printed on the next line following
+#'   \code{msg}.
+#'
+#' @return Returns the message from the last logger named, may be NULL if that
+#'   logger does not log the message due to threshold issues and
+#'   \code{flog.carp(TRUE)} is not set.
+#'
+#' @name sayInfo
+#' @import futile.logger
+NULL
+
+#' @describeIn sayInfo Print a message to specified loggers with
+#'   a threshold of \code{TRACE}.
+#' @export
+sayTrace <- function( msg, ...,
+   name= paste0( packageName(), c( ".file", ".console" )), capture= FALSE
+) {
+   for( logger in name) {
+      x <- flog.trace( msg= msg, ..., name= logger, capture= capture )
+   }
+   return(x)
+}
+
+#' @describeIn sayInfo Print a message to specified loggers with
+#'   a threshold of \code{DEBUG} or \code{TRACE}.
+#' @export
+sayDebug <- function( msg, ...,
+   name= paste0( packageName(), c( ".file", ".console" )), capture= FALSE
+) {
+   for( logger in name) {
+      x <- flog.debug( msg= msg, ..., name= logger, capture= capture )
+   }
+   return(x)
+}
+
+#' @describeIn sayInfo Print a message to specified loggers with
+#'   a threshold of \code{INFO}, \code{DEBUG} or \code{TRACE}.
+#' @export
+sayInfo <- function( msg, ...,
+   name= paste0( packageName(), c( ".file", ".console" )), capture= FALSE
+) {
+   for( logger in name) {
+      x <- flog.info( msg= msg, ..., name= logger, capture= capture )
+   }
+   return(x)
+}
+
+#' @describeIn sayInfo Print a message to specified loggers with
+#'   a threshold of \code{WARN}, \code{INFO}, \code{DEBUG} or \code{TRACE}.
+#' @export
+sayWarn <- function( msg, ...,
+   name= paste0( packageName(), c( ".file", ".console" )), capture= FALSE
+) {
+   for( logger in name) {
+      x <- flog.warn( msg= msg, ..., name= logger, capture= capture )
+   }
+   return(x)
+}
+
+#' @describeIn sayInfo Print a message to specified loggers with a threshold of
+#'   \code{ERROR}, \code{WARN}, \code{INFO}, \code{DEBUG} or \code{TRACE}.
+#' @export
+sayError <- function( msg, ...,
+   name= paste0( packageName(), c( ".file", ".console" )), capture= FALSE
+) {
+   for( logger in name) {
+      x <- flog.error( msg= msg, ..., name= logger, capture= capture )
+   }
+   return(x)
+}
+
+#' @describeIn sayInfo Print a message to specified loggers with a threshold of
+#'   \code{FATAL} \code{ERROR}, \code{WARN}, \code{INFO}, \code{DEBUG} or
+#'   \code{TRACE}.
+#' @export
+sayFatal <- function( msg, ...,
+   name= paste0( packageName(), c( ".file", ".console" )), capture= FALSE
+) {
+   for( logger in name) {
+      x <- flog.fatal( msg= msg, ..., name= logger, capture= capture )
+   }
+   return(x)
+}

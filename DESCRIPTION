@@ -9,6 +9,7 @@ Description: Work with the aligned read data as provided in a *.sam file, as in
 License: MIT + file LICENSE
 LazyData: TRUE
 RoxygenNote: 5.0.1
+Imports: futile.logger
 Suggests: testthat,
     knitr,
     rmarkdown

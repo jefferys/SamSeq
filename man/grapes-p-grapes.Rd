@@ -22,13 +22,22 @@ Returns the result of pasting the two objects together:
 }
 }
 \description{
-Binary operator versions of paste and paste0
+Like most operators, can split across lines with operator at front of second
+line only if inside parenthesis. Unlike most operators, this is pretty
+likely to happen. See Examples.
 }
 \examples{
 "Hello, " \%p\% "world!" == "Hello, world!"
 "Hello," \%pp\% "world!" == "Hello, world!"
 name <- "Amy"
 "Hello," \%pp\% name \%p\% "!" == "Hello, Amy!"
+"Hello," \%pp\%
+   "world!" == "Hello, world!"
+("Hello,"
+    \%pp\% "world!") == "Hello, world!"
+# "Hello,"
+#    \%pp\% "world!" == "Hello, world!"
+# Error: unexpected SPECIAL in "     \%pp\%"
 
 }
 
