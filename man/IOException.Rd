@@ -63,8 +63,8 @@ DirectoryExistsException(path,
   path, getwd()), call = NULL, package = packageName(), ...)
 
 LinkExistsException(path, target,
-  message = sprintf("Link already exists: \\"\%s\\" with. (Running in: \\"\%s\\").",
-  path, getwd()), call = NULL, package = packageName(), ...)
+  message = sprintf("Link already exists: \\"\%s\\" with target: \\"\%s\\". (Running in: \\"\%s\\").",
+  path, target, getwd()), call = NULL, package = packageName(), ...)
 }
 \arguments{
 \item{message}{The message associated with the exception, for reading by
