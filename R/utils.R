@@ -102,11 +102,15 @@ merge.list <- function(x, y, keepOrder= FALSE) {
 #' \emph{each} undefined logger passed in causes a logging call to search up the
 #' tree of loggers looking for a "fall-back" logger. As a last resort, this will
 #' be logged by the root logger. This prevents messages being lost, but can
-#' result in the same message being logged multiple times. To prevent a logger
-#' from logging anything, set its threshold to 0. Even FATAL errors are then
-#' ignored by that logger. Numerical constants seem fine; there is no matching
-#' named constant for 0. Perhaps this should be called "OFF"? To ensure a logger
-#' logs everything, set its logging threshold to "TRACE".
+#' result in the same message being logged multiple times.
+#'
+#' To prevent a logger from logging anything, set its threshold to OFF. OFF is
+#' exported as another constant for use with loggers and is a higher priority
+#' than FATAL. No logging function can generate a message with priority
+#' greater than FATAL.
+#'
+#' To ensure a logger logs everything, set its logging threshold to "TRACE". No
+#' logging function can generate a message with priority lower than TRACE
 #'
 #' @param msg The message to print, possibly a string with \code{\link{sprintf}}
 #'   symbols (like \code{\%s}), unless \code{capture= TRUE}
@@ -202,4 +206,49 @@ sayFatal <- function( msg, ...,
       x <- flog.fatal( msg= msg, ..., name= logger, capture= capture )
    }
    return(x)
+}
+
+#' @export
+OFF <- c(OFF= 0L)
+
+#' Initialize default loggers
+#'
+#' Sets up the default \code{"\var{package}.console"} and
+#' \code{"\var{package}.file"} loggers. Use the \code{say\var{level}} function
+#' to log simultaneously to them. If you log from a script or a console and
+#' don't specify the log file, it will write to the probably hidden file
+#' \file{".log"}. Allowed log levels are, in order of decreasing importance:
+#' \code{OFF}, \code{FATAL}, \code{ERROR}, \code{WARN}, \code{INFO},
+#' \code{DEBUG}, \code{TRACE}.
+#'
+#' @param file The name of the log file, by default \file{"\var{package}.log"}
+#'   where \var{package} is guessed using \code{link{packageName()}}.
+#' @param fileLevel Only messages at least this important will be saved to the
+#'   log file, by default "WARN".
+#' @param fileLevel Only messages at least this important will be printed to the
+#'   console, by default "INFO".
+#' @return Nothing, called only for its side effect of initializing loggers.
+#'
+#' @examples
+#' \dontrun{
+#'   initSayLoggers()
+#'   # Won't be logged
+#'   sayDebug('Initialized logging.')
+#'   # Logged only to console, not file
+#'   sayInfo('Welcome!')
+#'   # Logged to console and file.
+#'   sayWarn("This conversation is being monitored.")
+#' }
+#' @export
+initSayLoggers <- function( file= packageName() %p% ".log",
+                            fileLevel= WARN, consoleLevel= INFO
+) {
+   if ( fileLevel == 'OFF' ) {
+      fileLevel <- 0
+   }
+   if ( consoleLevel == 'OFF' ) {
+      consoleLevel <- 0
+   }
+   flog.logger( packageName() %p% ".file", fileLevel, appender=appender.file( file ))
+   flog.logger( packageName() %p% ".console", consoleLevel, appender=appender.console() )
 }

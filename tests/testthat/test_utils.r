@@ -78,7 +78,7 @@ describe( "Logging with the say functions", {
       flog.logger( name="test_WARN", WARN, appender=appender.console() )
       flog.logger( name="test_ERROR", ERROR, appender=appender.console() )
       flog.logger( name="test_FATAL", FATAL, appender=appender.console() )
-      flog.logger( name="test_OFF", 0, appender=appender.console() )
+      flog.logger( name="test_OFF", OFF, appender=appender.console() )
       allLoggers <- c( "test_TRACE", "test_DEBUG", "test_INFO",
                        "test_WARN", "test_ERROR", "test_FATAL", "test_OFF" )
 
@@ -164,8 +164,7 @@ describe( "Logging with the say functions", {
    })
    describe( "Split logging to console + file by default", {
       file <- tempfile("tempLog", fileext= ".log" )
-      flog.logger( name=packageName() %p% ".file",     INFO, appender=appender.file(file) )
-      flog.logger( name=packageName() %p% ".console", DEBUG, appender=appender.console()  )
+      initSayLoggers(file=file, fileLevel = INFO, consoleLevel= DEBUG )
       dateRE <- "\\[\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d\\]"
 
       it( "Logs to both if level allows", {
@@ -201,6 +200,7 @@ describe( "Logging with the say functions", {
          expect_match( gotText, wantTextRE, perl=TRUE )
          file.remove(file)
       })
+
    })
    describe( "Returns expected value, including respecting carp", {
       flog.logger( name="test_DEBUG", DEBUG, appender=appender.console() )
@@ -235,6 +235,24 @@ describe( "Logging with the say functions", {
          expect_false(flog.carp(name="test_INFO"))
          expect_output( got <- sayDebug( message, name= c("test_DEBUG", "test_INFO")), ".+" )
          expect_null( got )
+      })
+   })
+   describe( "sprintf message formats work.", {
+      file <- tempfile("tempLog", fileext= ".log" )
+      initSayLoggers(file=file, fileLevel = INFO, consoleLevel= DEBUG )
+      dateRE <- "\\[\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d\\]"
+      it( "Message can be a sprintf style string", {
+         message <- "This is a number %i and a string %s."
+         messageRE <- "\\Q" %p% "This is a number 4 and a string FOUR." %p% "\\E"
+         wantRE <- "(?s)^ERROR" %pp% dateRE %pp% messageRE %p% "$"
+         expect_false(file.exists(file))
+         x <- 4; y <- "FOUR"
+         expect_output( sayError( message, x, y ), wantRE, perl= TRUE )
+         expect_true(file.exists(file))
+         gotText <- paste0(readLines(file))
+         wantTextRE <- "(?s)^ERROR" %pp% dateRE %pp% messageRE %p% "$"
+         expect_match( gotText, wantTextRE, perl=TRUE )
+         file.remove(file)
       })
    })
 })

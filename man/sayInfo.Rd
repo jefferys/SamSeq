@@ -28,26 +28,28 @@ sayFatal(msg, ..., name = paste0(packageName(), c(".file", ".console")),
   capture = FALSE)
 }
 \arguments{
-\item{msg}{The message to print, possibly a string with sprintf symbols (like \code{\%s}),
-unless \code{capture= TRUE}}
+\item{msg}{The message to print, possibly a string with \code{\link{sprintf}}
+symbols (like \code{\%s}), unless \code{capture= TRUE}}
 
 \item{...}{Extra arguments for use by \code{msg}, if it is a sprintf message
-(\code{capture= FALSE}), or objects to have the logger format and print starting on
-the line following the non-sprintf message. (\code{capture= TRUE}.)}
+(\code{capture= FALSE}), or objects to have the logger format and print
+starting on the line following a non-sprintf message. (\code{capture=
+TRUE}.)}
 
-\item{name}{The logger names to use (a vector of strings). By default will use
-\code{c( \var{package}.file, \var{package}.code )}. A message of
-the appropriate level with be logged to each.}
+\item{name}{The logger names to use (a vector of strings). By default will
+use \code{c( \var{package}.file, \var{package}.code )}. A message of the
+appropriate level with be logged to each.}
 
-\item{capture}{By default (FALSE), extra object arguments are handled as format
-variables for the message, which should contain a matching number of sprintf
-variable symbols. If TRUE, then extra object arguments are handled by the
-appender layout, by default printed on the next line following \code{msg}.}
+\item{capture}{By default (FALSE), extra object arguments are handled as
+format variables for the message, which should contain a matching number of
+sprintf variable symbols. If TRUE, then extra object arguments are handled
+by the appender layout, by default printed on the next line following
+\code{msg}.}
 }
 \value{
 Returns the message from the last logger named, may be NULL if that
-  logger does not log the message due to threshold issues and flog.carp(TRUE)
-  is not set.
+  logger does not log the message due to threshold issues and
+  \code{flog.carp(TRUE)} is not set.
 }
 \description{
 These are essentially the same as the level-specific loggers in
@@ -66,14 +68,19 @@ to two loggers: \code{"\var{package}.file"} and
 \code{"\var{package}.console"}.
 
 All loggers should be defined before being used in a log message. Since
-loggers are a hierarchical names space based on the "." separator in the
-names, \emph{each} undefined logger passed in causes a logging call to search
-up the tree of loggers. As a last resort, this will be logged by the root
-logger. This prevents messages being lost, but can result in the same message
-being logged multiple times. To prevent a logging from logging anything, set
-its threshold to 0. Even FATAL errors are ignored. Numerical constants seem
-fine; there is no matching named constant. Perhaps this should be called "OFF"?
-To ensure a logger logs everything, set its logging threshold to "TRACE".
+loggers are a hierarchical namespace based on the "." separator in the names,
+\emph{each} undefined logger passed in causes a logging call to search up the
+tree of loggers looking for a "fall-back" logger. As a last resort, this will
+be logged by the root logger. This prevents messages being lost, but can
+result in the same message being logged multiple times.
+
+To prevent a logger from logging anything, set its threshold to OFF. OFF is
+exported as another constant for use with loggers and is a higher priority
+than FATAL. No logging function can generate a message with priority
+greater than FATAL.
+
+To ensure a logger logs everything, set its logging threshold to "TRACE". No
+logging function can generate a message with priority lower than TRACE
 }
 \section{Functions}{
 \itemize{
