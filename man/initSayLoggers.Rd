@@ -23,8 +23,8 @@ Nothing, called only for its side effect of initializing loggers.
 \description{
 Sets up the default \code{"\var{package}.console"} and
 \code{"\var{package}.file"} loggers. Use the \code{say\var{level}} function
-to log simultaneously to them. If you log from a script or a cosole and don't
-specify the log file, it will write to the probably hidden file
+to log simultaneously to them. If you log from a script or a console and
+don't specify the log file, it will write to the probably hidden file
 \file{".log"}. Allowed log levels are, in order of decreasing importance:
 \code{OFF}, \code{FATAL}, \code{ERROR}, \code{WARN}, \code{INFO},
 \code{DEBUG}, \code{TRACE}.
@@ -33,7 +33,7 @@ specify the log file, it will write to the probably hidden file
 \dontrun{
   initSayLoggers()
   # Won't be logged
-  sayDebug('Initilized logging.')
+  sayDebug('Initialized logging.')
   # Logged only to console, not file
   sayInfo('Welcome!')
   # Logged to console and file.

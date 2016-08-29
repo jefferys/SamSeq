@@ -144,7 +144,7 @@ Exception <- function ( message= 'An Exception occurred.',
 ) {
    structure(
       class= c("Exception","condition"),
-      merge.list(
+      merge(
          list(message=message, call=call, package=package),
          list(...)
       )
