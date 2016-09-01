@@ -1,15 +1,5 @@
 context("Testing IOExceptions and sub-classes.")
 
-# General test fixture - extend expect_equal to support NULL if want NULL
-expect_equalOrNull <- function(got, want) {
-   if (is.null(want)) {
-      expect_null(got)
-   }
-   else {
-      expect_equal(got, want)
-   }
-}
-
 # Specific test fixture - test that a constructed IOexception has the correct
 # content via all S3 accessors and for any additional data as well. Requires
 # a list with the expected elements, see desc$ references below.
