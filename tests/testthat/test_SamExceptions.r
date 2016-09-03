@@ -79,6 +79,15 @@ describe( 'Format string accessors generate correct messages', {
 					%pp% 'Temporary files with just reads are not true sam files.')
 		expect_equal(got, want)
 	})
+	it( "HeaderOnlyMsg()", {
+		got <- HeaderOnlyMsg( path="FILE", wd="DIR" )
+		want <- ('A HeaderOnlyException occurred in sam file: "FILE".'
+					%pp% '(Running in: "DIR").\n'
+					%p% 'Sam files require reads.'
+					%pp% 'Temporary files with just headers are not true sam files.')
+		expect_equal(got, want)
+	})
+
 })
 
 describe( "SamFileFormatException", {
@@ -179,7 +188,6 @@ describe( "SamFileHeaderException", {
 		expect_equal( got, want )
 	})
 })
-
 describe( "MISSING_HEADER_Exception", {
 	MISSING_HEADER_ExceptionClasses = c( "MISSING_HEADER_Exception",
 		"SamFileHeaderException", "SamFileFormatException", "FileFormatException",
@@ -207,6 +215,36 @@ describe( "MISSING_HEADER_Exception", {
 		want= MISSING_HEADER_Msg()
 		expect_equal( got, want )
 		got <- conditionMessage( MISSING_HEADER_Exception(
+			message= "new message", package=NULL, path=NA ))
+		want <- "new message"
+		expect_equal( got, want )
+	})
+})
+describe( "HeaderOnlyException", {
+	HeaderOnlyExceptionClasses = c( "HeaderOnlyException",
+		"SamFileReadException", "SamFileFormatException", "FileFormatException",
+		"DataException", "Exception", "condition" )
+	it( "Constructs the expected default object", {
+		got <- HeaderOnlyException( path="../" )
+		desc <- list(
+			class= HeaderOnlyExceptionClasses,
+			displayMessage= '[' %p% thisPackage %p% ']' %pp% HeaderOnlyMsg( path= "../" ),
+			call= NULL, package=  thisPackage,
+			path= "../", data=NA, line=NA
+		)
+		expect_SamFileFormatException_like( got, desc )
+	})
+	it( "Can set message, call, package, data, and extData", {
+		desc <- samFileFormatExceptionDescription( HeaderOnlyExceptionClasses )
+		argList <- samFileFormatExceptionDescriptionAsArguments( desc )
+		got <- do.call( "HeaderOnlyException", argList )
+		expect_SamFileFormatException_like( got, desc )
+	})
+	it( "Displays raw message if package is null", {
+		got <- conditionMessage( HeaderOnlyException(package= NULL, path=NA ))
+		want= HeaderOnlyMsg()
+		expect_equal( got, want )
+		got <- conditionMessage( HeaderOnlyException(
 			message= "new message", package=NULL, path=NA ))
 		want <- "new message"
 		expect_equal( got, want )

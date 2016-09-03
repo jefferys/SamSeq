@@ -68,6 +68,13 @@ MISSING_HEADER_Msg <- function( path= NA, wd= getwd() ) {
 				%pp% 'Temporary files with just reads are not true sam files.',
 	path, wd)
 }
+HeaderOnlyMsg <- function( path= NA, wd= getwd() ) {
+	sprintf( 'A HeaderOnlyException occurred in sam file: "%s".'
+				%pp% '(Running in: "%s").\n'
+				%p% 'Sam files require reads.'
+				%pp% 'Temporary files with just headers are not true sam files.',
+				path, wd)
+}
 
 #' @describeIn SamFileFormatException
 #'
@@ -159,12 +166,36 @@ SamFileReadException <- function( path=NA, line=NA, data=NA,
 #'
 #' @export
 MISSING_HEADER_Exception <- function( path=NA, data=NA, line=NA,
-	message= MISSING_HEADER_Msg( path= path ),
-	call= NULL, package= packageName(), ...
+	message= MISSING_HEADER_Msg( path= path ), call= NULL, package= packageName(), ...
 ) {
 	sfhEx <- SamFileHeaderException( message=message, call= call, package= package,
 												path=path, data=data, line=line, ... )
 	extendException( "MISSING_HEADER_Exception", sfhEx )
+}
+
+
+#' @describeIn SamFileFormatException
+#'
+#' Sam files require reads. Temporary files with just headers are not true sam
+#' files.
+#' \itemize{
+#'    \item message = [\var{package}] A HeaderOnlyException occurred in sam
+#'    file: "\var{file}". (Running in: "\var{getwd()}"). Sam files require
+#'    reads. Temporary files with just headers are not true sam files.'
+#'    \item class = \code{c( "HeaderOnlyException",
+#'    "SamFileReadException", "SamFileFormatException", "FileFormatException",
+#'    "DataException", "Exception", "condition" )}
+#' }
+#' @usage \code{ HeaderOnlyException( path = NA, line = NA, data = NA,
+#'    message = *, call = NULL, package = packageName(), ...)}
+#'
+#' @export
+HeaderOnlyException <- function( path=NA, data=NA, line= NA,
+	message= HeaderOnlyMsg( path= path ), call= NULL, package= packageName(), ...
+) {
+	sfrEx <- SamFileReadException( message=message, call= call, package= package,
+				path=path, data=data, line=line, ... )
+	extendException( "HeaderOnlyException", sfrEx )
 }
 
 samErrors <- list(
@@ -192,8 +223,13 @@ samErrors <- list(
       groups= c('samHeaderError'),
       message= ""
    ),
+   'DUPLICATE_READ_GROUP_ID' = "Same read group id appears more than once",
+   'MISSING_PLATFORM_VALUE' = "The read group is missing its PL (platform unit) field",
+   'INVALID_PLATFORM_VALUE' = "The read group has an invalid value set for its PL field",
+   'DUPLICATE_PROGRAM_GROUP_ID' = "Same program group id appears more than once",
+   'MISSING_VERSION_NUMBER' = "",
+   'INVALID_VERSION_NUMBER' = "",
 
-   'INVALID_QUALITY_FORMAT' = "Quality encodings out of range; appear to be Solexa or Illumina when Phread expected.",
    'INVALID_FLAG_PROPER_PAIR' = "Proper pair flag set for unpaired read.",
    'INVALID_FLAG_MATE_UNMAPPED' = "Mate unmapped flag set when mate is mapped or not set when mate is not mapped",
    'MISMATCH_FLAG_MATE_UNMAPPED' = "Mate unmapped flag does not match read unmapped flag of mate",
@@ -205,6 +241,8 @@ samErrors <- list(
    'INVALID_FLAG_NOT_PRIM_ALIGNMENT' = "Not primary alignment flag set for unmapped read",
    'INVALID_FLAG_SUPPLEMENTARY_ALIGNMENT' = "Supplementary alignment flag set for unmapped read",
    'INVALID_FLAG_READ_UNMAPPED' =  "Mapped read flat not set for mapped read",
+
+   'INVALID_QUALITY_FORMAT' = "Quality encodings out of range; appear to be Solexa or Illumina when Phread expected.",
    'INVALID_INSERT_SIZE' = "Inferred insert size is out of range",
    'INVALID_MAPPING_QUALITY' = "Mapping quality set for unmapped read or is >= 256",
    'INVALID_CIGAR' = "CIGAR string is empty for mapped read or not empty of unmapped read, or other CIGAR badness",
@@ -221,8 +259,6 @@ samErrors <- list(
    'READ_GROUP_NOT_FOUND' = "A read group ID on a SAMRecord is not found in the header",
    'RECORD_MISSING_READ_GROUP' = "A SAMRecord is found with no read group id",
    'INVALID_INDEXING_BIN' = "Indexing bin set on SAMRecord does not agree with computed value",
-   'MISSING_VERSION_NUMBER' = "",
-   'INVALID_VERSION_NUMBER' = "",
    'TRUNCATED_FILE' = "",
    'MISMATCH_READ_LENGTH_AND_QUALS_LENGTH' = "",
    'EMPTY_READ' = "",
@@ -235,10 +271,7 @@ samErrors <- list(
    'TAG_VALUE_TOO_LARGE' = "Unsigned integer tag value is deprecated in BAM",
    'INVALID_INDEX_FILE_POINTER' = "Invalid virtualFilePointer in index",
    'INVALID_PREDICTED_MEDIAN_INSERT_SIZE' = "PI tag value is not numeric",
-   'DUPLICATE_READ_GROUP_ID' = "Same read group id appears more than once",
-   'MISSING_PLATFORM_VALUE' = "The read group is missing its PL (platform unit) field",
-   'INVALID_PLATFORM_VALUE' = "The read group has an invalid value set for its PL field",
-   'DUPLICATE_PROGRAM_GROUP_ID' = "Same program group id appears more than once",
+
    'MATE_NOT_FOUND' = "Read is marked as paired, but its pair was not found",
    'MATES_ARE_SAME_END' = "Both mates are marked as first of pair, or both mates are marked as second of pair",
    'MISMATCH_MATE_CIGAR_STRING' = "The Cigar String in the MC Tag does not match the Cigar String for the mate of this read",
