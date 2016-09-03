@@ -49,14 +49,30 @@ dataExceptionDescriptionAsArguments <- function( desc ) {
 # To be definitive in testing.
 thisPackage <- "SamSeq"
 
+describe( 'Format string accessors generate correct messages', {
+	it( "FileFormatMsg()", {
+		got <- FileFormatMsg( line=123, path='FILE', wd='DIR', data='TEXT')
+		want <- 	('A FileFormatException occurred at line 123 in file:'
+					 %pp% '"FILE". (Running in: "DIR").\n'
+					 %p% 'That line began: "TEXT".')
+		expect_equal(got, want)
+	})
+	it( "EmptyFileMsg()", {
+		got <- EmptyFileMsg( path='FILE', wd='DIR')
+		want <- 	('An EmptyFileException occurred. File is unexpectedly empty:'
+					 %pp% '"FILE". (Running in: "DIR").')
+		expect_equal(got, want)
+	})
+})
 describe( "DataException", {
 	DataExceptionClasses = c( "DataException", "Exception", "condition" )
 	it( "Constructs the expected default object", {
-		got <- DataException(data=NULL)
+		got <- DataException()
 		desc <- list(
 			class=    DataExceptionClasses,
 			displayMessage= sprintf("[%s] A DataException occurred.", thisPackage),
 			call=     NULL,
+			data= NA,
 			package=  thisPackage
 		)
 		expect_DataException_like( got, desc )
@@ -68,7 +84,7 @@ describe( "DataException", {
 		expect_DataException_like( got, desc )
 	})
 	it( "Displays raw message if package is null", {
-		got <- conditionMessage( DataException(package= NULL, data=NULL ))
+		got <- conditionMessage( DataException(package= NULL ))
 		want <- "A DataException occurred."
 		expect_equal( got, want )
 		got <- conditionMessage( DataException(message= "new message", package= NULL, data=42 ))
@@ -80,17 +96,15 @@ describe( "FileFormatException", {
 	FileFormatExceptionClasses = c( "FileFormatException","DataException",
 											  "Exception", "condition" )
 	it( "Constructs the expected default object", {
-		got <- FileFormatException(path=NA_character_)
+		got <- FileFormatException()
 		desc <- list(
 			class=    FileFormatExceptionClasses,
-			displayMessage= ('[' %p% thisPackage %p% '] A FileFormatException occurred at line'
-				%pp% 'NA in file: "NA". (Running in: "' %p% getwd()
-			   %p% '").\nThat line began: "NA".'),
-			call=     NULL,
-			path= NA_character_,
-			data= NA_character_,
-			line= NA_integer_,
-			package=  thisPackage
+			displayMessage= ('[' %p% thisPackage %p% ']' %pp% FileFormatMsg()),
+			call= NULL,
+			path= NA,
+			data= NA,
+			line= NA,
+			package= thisPackage
 		)
 		expect_DataException_like( got, desc )
 	})
@@ -102,11 +116,41 @@ describe( "FileFormatException", {
 	})
 	it( "Displays raw message if package is null", {
 		got <- conditionMessage( FileFormatException(path=NA))
-		want <- ('[' %p% thisPackage %p% '] A FileFormatException occurred at line'
-					%pp% 'NA in file: "NA". (Running in: "' %p% getwd()
-					%p% '").\nThat line began: "NA".')
+		want <- ('[' %p% thisPackage %p% ']' %pp% FileFormatMsg(wd= getwd()))
 		expect_equal( got, want )
 		got <- conditionMessage( FileFormatException(
+			message= "new message", package= NULL, path="bob", data=42 ))
+		want <- "new message"
+		expect_equal( got, want )
+	})
+})
+describe( "EmptyFileException", {
+	EmptyFileExceptionClasses = c( "EmptyFileException", "FileFormatException",
+		"DataException", "Exception", "condition" )
+	it( "Constructs the expected default object", {
+		got <- EmptyFileException()
+		desc <- list(
+			class=    EmptyFileExceptionClasses,
+			displayMessage= ('[' %p% thisPackage %p% ']' %pp% EmptyFileMsg()),
+			call=     NULL,
+			path= NA,
+			data= NA,
+			line= NA,
+			package=  thisPackage
+		)
+		expect_DataException_like( got, desc )
+	})
+	it( "Can set message, call, package, data, and extData", {
+		desc <- dataExceptionDescription( EmptyFileExceptionClasses )
+		argList <- dataExceptionDescriptionAsArguments( desc )
+		got <- do.call( "EmptyFileException", argList )
+		expect_DataException_like( got, desc )
+	})
+	it( "Displays raw message if package is null", {
+		got <- conditionMessage( EmptyFileException(path=NA))
+		want <- ('[' %p% thisPackage %p% ']' %pp% EmptyFileMsg())
+		expect_equal( got, want )
+		got <- conditionMessage( EmptyFileException(
 			message= "new message", package= NULL, path="bob", data=42 ))
 		want <- "new message"
 		expect_equal( got, want )

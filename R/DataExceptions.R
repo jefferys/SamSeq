@@ -22,10 +22,9 @@
 #'   script level code and not from a package. Attempts to guess the package by
 #'   default. Will usually include the package in the displayed \code{message}.
 #' @param data The data element associated with an exception. Format varies and
-#'   should be described in subclass documentation. This is required for all
-#'   \code{DataException}s and sub-classes, but may be \code{NULL} or \code{NA};
-#'   Subclasses may restrict allowed values. Accessible via the the
-#'   \code{exceptionData} S3 accessor.
+#'   should be described in subclass documentation. This may be \code{NA} but
+#'   should not be \code{NULL}. Accessible via the the \code{exceptionData} S3
+#'   accessor.
 #' @param path The path associated with an exception, as a one element character
 #'   vector This is required for a \code{FileFormatException} or sub-class. It
 #'   may be \code{NA} but should not be \code{NULL}. Accessible via the the
@@ -45,7 +44,7 @@
 #' \itemize{
 #'    \item message: "\code{[\var{package}] A DataException occurred.}"
 #'    \item class: \code{c( "DataException", "Exception", "condition" )}
-#'    \item data: \code{data} - see \code{exceptionData}.
+#'    \item data: Defaults: \code{data = NA}.
 #' }
 #'
 #' @return An \code{DataException} or descendant describing some problematic
@@ -62,11 +61,18 @@
 #' exceptionPackage(dEx)
 #' exceptionData(dEx)
 #' @export
-DataException <- function( data, message= 'A DataException occurred.',
+DataException <- function( data=NA, message= 'A DataException occurred.',
 								 call= NULL, package=packageName(), ...
 ) {
 	e <- Exception( message= message, call= call, package= package, data=data, ... )
 	extendException( "DataException", e )
+}
+
+FileFormatMsg <- function (path= NA, line= NA, data= NA, wd= getwd() ) {
+	sprintf( 'A FileFormatException occurred at line %i in file: "%s".'
+				%pp% '(Running in: "%s").\n'
+				%p% 'That line began: "%s".',
+				line, path, wd, substr(data, 1, 80))
 }
 
 #' @describeIn DataException
@@ -76,32 +82,81 @@ DataException <- function( data, message= 'A DataException occurred.',
 #' \itemize{
 #'    \item message: "\code{[\var{package}] A FileFormatException occurred at
 #'    	line \var{line} in file: "\var{file}". (Running in: "\var{getwd()}").
-#'    	That line began: "\var{first 20 char}".}"
+#'    	That line began: "\var{first 80 char}".}"
 #'    \item class: \code{c( "FileFormatException", "DataException", "Exception",
 #'       "condition" )}
-#'    \item data: \code{data} A length one character vector giving the contents
-#'       of the first offending line, possibly NA. See \code{exceptionData}.
-#'    \item line: \code{data} A length one integer vector giving the line
-#'       number of the first offending line - see \code{exceptionLine}.
-#'    \item path: \code{path} A length one character vector giving the name
-#'       of the file with a problem- see \code{exceptionPath}.
+#'    \item data: Defaults: \code{path = NA, line = NA, data = NA}.
 #' }
+#'
+#' @usage \code{ FileFormatException( path = NA, line = NA, data = NA,
+#'    message = *, call = NULL, package = packageName(), ...)}
+#'
 #' @export
-FileFormatException <- function( path, line=NA_integer_, data= NA_character_,
-	message= sprintf(
-		paste0(
-			'A FileFormatException occurred at line %i in file: "%s". ',
-   		'(Running in: "%s").\n',
-			'That line began: "%s".'
-		),
-		line, path, getwd(), substr(data, 1, 20)
-	), call= NULL, package= packageName(), ...
+FileFormatException <- function( path=NA, line=NA, data= NA,
+	message= FileFormatMsg(line=line, path=path, data=data),
+	call= NULL, package= packageName(), ...
 ) {
-	if (is.null(path)) {path <- NA_character_}
-	if (is.null(line)) {line <- NA_integer_}
-	if (is.null(data)) {data <- NA_character_}
 	dEx <- DataException( message=message, call= call, package= package,
 			data=data, path=path, line=line, ... )
 	extendException( "FileFormatException", dEx )
 }
 
+EmptyFileMsg <- function (path= NA, wd= getwd() ) {
+	sprintf( 'An EmptyFileException occurred. File is unexpectedly empty: "%s".'
+				%pp% '(Running in: "%s").', path, wd)
+}
+
+#' @describeIn DataException
+#'
+#' This exception indicates a data file was unexpectedly empty
+#' \itemize{
+#'    \item message:  [\var{package}] An EmptyFileException occurred. File
+#'    is unexpectedly empty: "\var{file}". (Running in: "\var{getwd()}").
+#'    \item class: \code{c( "EmptyFileException", "FileFormatException",
+#'    	"DataException", "Exception", "condition" )}
+#'    \item data: Defaults: \code{path = NA, data= NA, line= NA}.
+#' }
+#'
+#' @usage \code{ EmptyException( path = NA, line = NA, data = NA,
+#'    message = *, call = NULL, package = packageName(), ...)}
+#'
+#' @export
+EmptyFileException <- function( path=NA, data=NA, line=NA,
+	message= EmptyFileMsg( path=path ),
+	call= NULL, package= packageName(), ...
+) {
+	ffEx <- FileFormatException( message=message, call= call, package= package,
+								 data=data, path=path, line=line, ... )
+	extendException( "EmptyFileException", ffEx )
+}
+
+FileNotEmptyMsg <- function (path= NA, wd= getwd() ) {
+	sprintf( 'A FileNotEmptyException occurred. File was expected to be empty'
+				%pp% 'but wasn\'t: "%s".'
+				%pp% '(Running in: "%s").', path, wd)
+}
+
+#' @describeIn DataException
+#'
+#' This exception indicates a data file that should have been empty but wasn't.
+#' \itemize{
+#'    \item message:  [\var{package}] A FileNotEmptyException occurred. File was
+#'    expectedly to be empty but wasn't: "\var{file}". (Running in:
+#'    "\var{getwd()}").
+#'    \item class: \code{c( "FileNotEmptyException", "FileFormatException",
+#'    	"DataException", "Exception", "condition" )}
+#'    \item data: Defaults: \code{path = NA, data= NA, line= NA}.
+#' }
+#'
+#' @usage \code{ FileNotEmptyException( path = NA, line = NA, data = NA,
+#'    message = *, call = NULL, package = packageName(), ...)}
+#'
+#' @export
+FileNotEmptyException <- function( path=NA, data=NA, line=NA,
+	message= FileNotEmptyMsg( path=path ),
+	call= NULL, package= packageName(), ...
+) {
+	ffEx <- FileFormatException( message=message, call= call, package= package,
+										 data=data, path=path, line=line, ... )
+	extendException( "FileNotEmptyException", ffEx )
+}

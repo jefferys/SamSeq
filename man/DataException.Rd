@@ -2,23 +2,28 @@
 % Please edit documentation in R/DataExceptions.R
 \name{DataException}
 \alias{DataException}
+\alias{EmptyFileException}
 \alias{FileFormatException}
+\alias{FileNotEmptyException}
 \title{The DataException hierarchy}
 \usage{
-DataException(data, message = "A DataException occurred.", call = NULL,
-  package = packageName(), ...)
+DataException(data = NA, message = "A DataException occurred.",
+  call = NULL, package = packageName(), ...)
 
-FileFormatException(path, line = NA_integer_, data = NA_character_,
-  message = sprintf(paste0("A FileFormatException occurred at line \%i in file: \\"\%s\\". ",
-  "(Running in: \\"\%s\\").\\n", "That line began: \\"\%s\\"."), line, path,
-  getwd(), substr(data, 1, 20)), call = NULL, package = packageName(), ...)
+\code{ FileFormatException( path = NA, line = NA, data = NA,
+   message = *, call = NULL, package = packageName(), ...)}
+
+\code{ EmptyException( path = NA, line = NA, data = NA,
+   message = *, call = NULL, package = packageName(), ...)}
+
+\code{ FileNotEmptyException( path = NA, line = NA, data = NA,
+   message = *, call = NULL, package = packageName(), ...)}
 }
 \arguments{
 \item{data}{The data element associated with an exception. Format varies and
-should be described in subclass documentation. This is required for all
-\code{DataException}s and sub-classes, but may be \code{NULL} or \code{NA};
-Subclasses may restrict allowed values. Accessible via the the
-\code{exceptionData} S3 accessor.}
+should be described in subclass documentation. This may be \code{NA} but
+should not be \code{NULL}. Accessible via the the \code{exceptionData} S3
+accessor.}
 
 \item{message}{The message associated with the exception, for reading by
 humans. The default message is usually good enough, but can be overridden
@@ -71,7 +76,7 @@ problems with data values, names, or formats.
 \itemize{
    \item message: "\code{[\var{package}] A DataException occurred.}"
    \item class: \code{c( "DataException", "Exception", "condition" )}
-   \item data: \code{data} - see \code{exceptionData}.
+   \item data: Defaults: \code{data = NA}.
 }
 
 \item \code{FileFormatException}: This exception and sub-classes are \code{Exception}s that describe
@@ -79,15 +84,29 @@ problems with data files
 \itemize{
    \item message: "\code{[\var{package}] A FileFormatException occurred at
        line \var{line} in file: "\var{file}". (Running in: "\var{getwd()}").
-       That line began: "\var{first 20 char}".}"
+       That line began: "\var{first 80 char}".}"
    \item class: \code{c( "FileFormatException", "DataException", "Exception",
       "condition" )}
-   \item data: \code{data} A length one character vector giving the contents
-      of the first offending line, possibly NA. See \code{exceptionData}.
-   \item line: \code{data} A length one integer vector giving the line
-      number of the first offending line - see \code{exceptionLine}.
-   \item path: \code{path} A length one character vector giving the name
-      of the file with a problem- see \code{exceptionPath}.
+   \item data: Defaults: \code{path = NA, line = NA, data = NA}.
+}
+
+\item \code{EmptyFileException}: This exception indicates a data file was unexpectedly empty
+\itemize{
+   \item message:  [\var{package}] An EmptyFileException occurred. File
+   is unexpectedly empty: "\var{file}". (Running in: "\var{getwd()}").
+   \item class: \code{c( "EmptyFileException", "FileFormatException",
+       "DataException", "Exception", "condition" )}
+   \item data: Defaults: \code{path = NA, data= NA, line= NA}.
+}
+
+\item \code{FileNotEmptyException}: This exception indicates a data file that should have been empty but wasn't.
+\itemize{
+   \item message:  [\var{package}] A FileNotEmptyException occurred. File was
+   expectedly to be empty but wasn't: "\var{file}". (Running in:
+   "\var{getwd()}").
+   \item class: \code{c( "FileNotEmptyException", "FileFormatException",
+       "DataException", "Exception", "condition" )}
+   \item data: Defaults: \code{path = NA, data= NA, line= NA}.
 }
 }}
 \examples{
