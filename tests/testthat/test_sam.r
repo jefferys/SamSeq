@@ -1,24 +1,34 @@
-context("Testing the sam file object functionality")
+context("Testing the Sam file object functionality")
 
-describe( "Loading a sam file from disk", {
-   it( "Warns if the sam file does not exist", {
-      fail()
-   })
-   it( "Loads the sam data into a samFile object", {
-      fail()
+noSuchFile <- tempfile("noSuchFile.sam")
+samFile <- file.path( "goodSamFiles", "pe.sam" )
+package <- packageName()
+
+describe( "Test fixtures for use in the test_sam testthat file", {
+   describe( "'noSuchFile' - A file path that does not exist.", {
+      it( "Fails to exist", {
+         expect_true( ! file.exists( noSuchFile ))
+      })
    })
 })
 
-describe( "Saving a samFile object to disk as a samFile", {
-   it( "By default, it fails if a file of the same name already exists", {
-      fail()
+describe( "Loading a sam file from disk", {
+   it( "Errors if the sam file does not exist", {
+      expect_condition( Sam(noSuchFile), "NoSuchFileException" )
    })
-   it( "If parameter force= TRUE is set, will replace an existing file of \
-       the same name", {
-          fail()
-   })
-   it( "Saving a just-read samFile object exactly reproduces the sam file \
-       it was read from", {
-      fail()
+   describe( "Sam object structure.", {
+      sam <- Sam(samFile)
+      it( "Is a sam object", {
+         expect_s3_class(sam, "Sam")
+      })
+
+      it( "Can retrieve a header, a reads and a meta object", {
+         header <- SamHeader(sam)
+         expect_s3_class(header, "SamHeader")
+         reads <- SamReads(sam)
+         expect_s3_class(reads, "SamReads")
+         meta <- SamMeta(sam)
+         expect_s3_class(meta, "SamMeta")
+      })
    })
 })
