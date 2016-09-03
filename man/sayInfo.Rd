@@ -74,13 +74,17 @@ tree of loggers looking for a "fall-back" logger. As a last resort, this will
 be logged by the root logger. This prevents messages being lost, but can
 result in the same message being logged multiple times.
 
-To prevent a logger from logging anything, set its threshold to OFF. OFF is
-exported as another constant for use with loggers and is a higher priority
-than FATAL. No logging function can generate a message with priority
-greater than FATAL.
+To prevent a logger from logging anything, set its threshold to \code{OFF}.
+\code{OFF} is exported as another constant for use with loggers and is a
+higher priority than \code{FATAL} No logging function can generate a message
+with priority greater than \code{FATAL} Note, this is not completely
+consistent with the use of the other constants, where the string can be used.
+\code{"INFO"} and \code{INFO} are treated similarly in most cases, whereas
+\code{"OFF"} and \code{OFF} are not. Always use the constant \code{OFF} (i.e.
+the value 0) and not the string.
 
-To ensure a logger logs everything, set its logging threshold to "TRACE". No
-logging function can generate a message with priority lower than TRACE
+To ensure a logger logs everything, set its logging threshold to \code{"TRACE"}. No
+logging function can generate a message with priority lower than \code{TRACE}
 }
 \section{Functions}{
 \itemize{

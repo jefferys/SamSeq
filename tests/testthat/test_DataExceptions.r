@@ -63,6 +63,12 @@ describe( 'Format string accessors generate correct messages', {
 					 %pp% '"FILE". (Running in: "DIR").')
 		expect_equal(got, want)
 	})
+	it( "FileNotEmptyMsg()", {
+		got <- FileNotEmptyMsg( path='FILE', wd='DIR')
+		want <- 	('A FileNotEmptyException occurred. File was expected to be empty'
+					 %pp% 'but wasn\'t: "FILE". (Running in: "DIR").')
+		expect_equal(got, want)
+	})
 })
 describe( "DataException", {
 	DataExceptionClasses = c( "DataException", "Exception", "condition" )
@@ -151,6 +157,38 @@ describe( "EmptyFileException", {
 		want <- ('[' %p% thisPackage %p% ']' %pp% EmptyFileMsg())
 		expect_equal( got, want )
 		got <- conditionMessage( EmptyFileException(
+			message= "new message", package= NULL, path="bob", data=42 ))
+		want <- "new message"
+		expect_equal( got, want )
+	})
+})
+describe( "FileNotEmptyException", {
+	FileNotEmptyExceptionClasses = c( "FileNotEmptyException", "FileFormatException",
+		"DataException", "Exception", "condition" )
+	it( "Constructs the expected default object", {
+		got <- FileNotEmptyException()
+		desc <- list(
+			class=    FileNotEmptyExceptionClasses,
+			displayMessage= ('[' %p% thisPackage %p% ']' %pp% FileNotEmptyMsg()),
+			call=     NULL,
+			path= NA,
+			data= NA,
+			line= NA,
+			package=  thisPackage
+		)
+		expect_DataException_like( got, desc )
+	})
+	it( "Can set message, call, package, data, and extData", {
+		desc <- dataExceptionDescription( FileNotEmptyExceptionClasses )
+		argList <- dataExceptionDescriptionAsArguments( desc )
+		got <- do.call( "FileNotEmptyException", argList )
+		expect_DataException_like( got, desc )
+	})
+	it( "Displays raw message if package is null", {
+		got <- conditionMessage( FileNotEmptyException(path=NA))
+		want <- ('[' %p% thisPackage %p% ']' %pp% FileNotEmptyMsg())
+		expect_equal( got, want )
+		got <- conditionMessage( FileNotEmptyException(
 			message= "new message", package= NULL, path="bob", data=42 ))
 		want <- "new message"
 		expect_equal( got, want )

@@ -2,7 +2,6 @@ context("Testing utils")
 
 describe( "merge() is extended to merge lists when everything has a name", {
    describe( "preconditions on lists being merged and the names of their elements", {
-
       it( "Errors when first element is not a list, if call explicitly", {
          listAB <- list(A=1, B=2, D=4)
          notList <- 'x'
@@ -31,6 +30,15 @@ describe( "merge() is extended to merge lists when everything has a name", {
          errorRE = "'y' contains elements with duplicated names\\."
          expect_error( merge(uniqueNamesList, duplicatedNamesList), errorRE )
       })
+   })
+	describe( "merging lists by appending by default", {
+		it( "Merging when list have unique names", {
+			listA <- list(A1=1, A2=2)
+			listB <- list(B1=3, B2=4)
+			want <- list(A1=1, A2=2, B1=3, B2=4)
+			got <- merge(listA, listB)
+			expect_equal(got, want)
+		})
       it( "When the same name is present in both lists, by default the element from \
            the first list is dropped before appending the second", {
          listAB <- list(A=1, B=2, D=4)
@@ -39,6 +47,29 @@ describe( "merge() is extended to merge lists when everything has a name", {
          got <- merge(listAB, listBC)
          expect_equal(got, want)
       })
+      it( "Works with empty lists", {
+      	listA <- list(A=1, B=2)
+      	listEmpty <- list()
+
+      	want <- listA
+      	got <- merge(listA, listEmpty)
+      	expect_equal(got, want)
+      	got <- merge(listEmpty, listA)
+      	expect_equal(got, want)
+
+      	want <- listEmpty
+      	got <- merge(listEmpty, listEmpty)
+      	expect_equal(got, want)
+      })
+	})
+   describe( "merging lists keeps order with keepOrder set", {
+   	it( "Keeps order when list have unique names", {
+   		listA <- list(A1=1, A2=2)
+   		listB <- list(B1=3, B2=4)
+   		want <- list(A1=1, A2=2, B1=3, B2=4)
+   		got <- merge(listA, listB, keepOrder=TRUE)
+   		expect_equal(got, want)
+   	})
       it( "If the user wants to retain the order of elements as musch as possible, \
           duplicate names in the first list have their values replaced and these \
           are dropped from the second list when appended.", {
@@ -47,6 +78,20 @@ describe( "merge() is extended to merge lists when everything has a name", {
          want <- list(A="a", B="b", D=4, C="c" )
          got <- merge(listAB, listBC, keepOrder=TRUE)
          expect_equal(got, want)
+      })
+      it( "keepOrder works fine with empty lists too", {
+      	listA <- list(A=1, B=2)
+      	listEmpty <- list()
+
+      	want <- listA
+      	got <- merge(listA, listEmpty, keepOrder=TRUE)
+      	expect_equal(got, want)
+      	got <- merge(listEmpty, listA, keepOrder=TRUE)
+      	expect_equal(got, want)
+
+      	want <- listEmpty
+      	got <- merge(listEmpty, listEmpty, keepOrder=TRUE)
+      	expect_equal(got, want)
       })
    })
 })
@@ -254,5 +299,29 @@ describe( "Logging with the say functions", {
          expect_match( gotText, wantTextRE, perl=TRUE )
          file.remove(file)
       })
+   })
+   describe( "OFF works as log level", {
+   	file <- tempfile("tempLog", fileext= ".log" )
+   	it ("Doesn't log when initilaized to OFF or \"OFF\"", {
+   		initSayLoggers(file=file, fileLevel = "OFF", consoleLevel= "OFF" )
+   		expect_false(file.exists(file))
+   		expect_silent( sayFatal( "IgnoreMe" ))
+   		expect_false(file.exists(file))
+
+   		initSayLoggers(file=file, fileLevel = "OFF", consoleLevel= "OFF" )
+   		expect_false(file.exists(file))
+   		expect_silent( sayFatal( "IgnoreMe" ))
+   		expect_false(file.exists(file))
+   	})
+   	it ("Doesn't log if changed to OFF or \"OFF\"", {
+   		initSayLoggers( file=file )
+   		flog.threshold( OFF, name= packageName() %p% ".file" )
+# This does not work!
+#   		flog.threshold( "OFF", name= packageName() %p% ".console" )
+   		flog.threshold( OFF, name= packageName() %p% ".console" )
+   		expect_false(file.exists(file))
+   		expect_silent( sayFatal( "IgnoreMe" ))
+   		expect_false(file.exists(file))
+   	})
    })
 })
