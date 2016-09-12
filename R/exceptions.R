@@ -83,7 +83,7 @@ condition <- function( message= 'condition', call= NULL ) {
 #'
 #' @param message
 #'   The message associated with the exception. By default this is \code{"An
-#'   Exception occurred."}. \code{conditionMessage(e)} is over-riden for
+#'   Exception occurred."}. \code{conditionMessage(e)} is overridden for
 #'   \code{Exception} and its extensions so that most of the time the
 #'   name of package where the exception was generated will be prepended upon
 #'   access, making the message appear to be \code{"[\var{package}]
@@ -272,4 +272,105 @@ exceptionPackage.Exception <- function (e, ...) { return (e$package) }
 extendException <- function( exception, base= Exception() ) {
    class(base) <- c(exception, class(base))
    return(base)
+}
+
+#' Better condition signaling with objects
+#'
+#' Use the \code{stopWith}, \code{warningWith}, and \code{messageWith} functions
+#' as replacements for the base \code{\link{stop}}, \code{\link{warning}}, and
+#' \code{\link{message}} functions when signaling with condition-based objects.
+#' These re-base the object to the correct "condition" subclass based on how
+#' they were signaled, adding either "error", "warning" and "message"
+#' (respectively) just before "condition. They then matching this new object
+#' with the matchin base \R function. This allows handlers to catch
+#' signaled objects based on how they were signaled, and to either group simple
+#' message based signals in with object signals, or to differentiate them.
+#'
+#' Normally, when a signal is caught, the handler that process it is based on
+#' the class of the signal object. \R's familiar signaling functions
+#' (\code{\link{stop}}, \code{\link{warning}}, and \code{\link{message}}) create
+#' objects that have different classes based on which was used. However, if you
+#' pass one of these signaling function an object rather than a simple message,
+#' it does \emph{not} change the class. If you don't catch it, somehow \R still
+#' knows they are different signals and does the right thing. However if the
+#' signal is caught in user code, this information is lost. A handler can not
+#' then recall \code{\link{stop}}, for instance, if it does not, after all, know
+#' how to handle a signal (a common problem).
+#'
+#' @param condition The condition object being signaled with. If the root class
+#'   (last) is not "condition", the object is resignaled as is.
+#'
+#' @return Nothing, called only for their signal generating and processing side
+#'   effects.
+#'
+#' @name exceptionSignaling
+NULL
+
+#' @describeIn exceptionSignaling Moves or adds class \code{c("error",
+#'   "condition")} to the end of the class of a condition object.
+#'
+#'   The \code{\link{stop}} function converts simple messages into objects of
+#'   class \code{c("simpleError", "error", "condition")}; both can thus be
+#'   caught with an \code{error=} handler, or they can be distinguished by the
+#'   \code{"simpleError"} class that (should) only be on a simple message based
+#'   signal.
+#
+#' @export
+stopWith <- function ( condition ) {
+	wasClass <- class( condition )
+	if (wasClass[length(wasClass)] != "condition") {
+		stop( condition )
+	}
+	else {
+		baseClass <- wasClass[! wasClass %in% c("error", "condition")]
+		newClass <- c( baseClass, "error", "condition" )
+		class(condition) <- newClass
+		stop( condition )
+	}
+}
+
+#' @describeIn exceptionSignaling Moves or adds class \code{c("warning",
+#'   "condition")} to the end of the class of the signal object.
+#'
+#'   The \code{\link{warning}} function converts simple messages into objects of
+#'   class \code{c("simpleWarning", "warning", "condition")}; both can thus be
+#'   caught with a \code{warning=} handler, or they can be distinguished by the
+#'   \code{"simpleWarning"} class that (should) only be on a simple message
+#'   based signal.
+#
+#' @export
+warningWith <- function ( condition ) {
+	wasClass <- class( condition )
+	if (wasClass[length(wasClass)] != "condition") {
+		warning( condition )
+	}
+	else {
+		baseClass <- wasClass[! wasClass %in% c("warning", "condition")]
+		newClass <- c( baseClass, "warning", "condition" )
+		class(condition) <- newClass
+		warning( condition )
+	}
+}
+
+#' @describeIn exceptionSignaling Moves or adds class \code{c("message",
+#'   "condition")} to the end of the class of the signal object.
+#'
+#'   The \code{\link{message}} function converts simple messages into objects of
+#'   class \code{c("simpleMessage", "message", "condition")}; both can thus be
+#'   caught with a \code{message=} handler, or they can be distinguished by the
+#'   \code{"simpleMessage"} class that (should) only be on a simple message
+#'   based signal.
+#
+#' @export
+messageWith <- function ( condition ) {
+	wasClass <- class( condition )
+	if (wasClass[length(wasClass)] != "condition") {
+		message( condition )
+	}
+	else {
+		baseClass <- wasClass[! wasClass %in% c("message", "condition")]
+		newClass <- c( baseClass, "message", "condition" )
+		class(condition) <- newClass
+		message( condition )
+	}
 }

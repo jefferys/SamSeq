@@ -182,3 +182,107 @@ describe( "Extending an exception with extendException()", {
 
    })
 })
+describe( "Signaling with object", {
+	it( 'signals as expected if not a condition object', {
+		bob <- structure( class="bobbob", list( theBobs=c( "bob", "bob" )))
+		expect_error(      stopWith( bob ))
+		expect_warning( warningWith( bob ))
+		expect_message( messageWith( bob ))
+	})
+	it( 'signals as expected if is a condition object', {
+		expect_error( stopWith( simpleError(     "bob" )), "^bob$" )
+		expect_error( stopWith( simpleWarning(   "bob" )), "^bob$" )
+		expect_error( stopWith( simpleMessage(   "bob" )), "^bob$" )
+		expect_error( stopWith( simpleCondition( "bob" )), "^bob$" )
+
+		expect_warning( warningWith( simpleError(     "bob" )), "^bob$" )
+		expect_warning( warningWith( simpleWarning(   "bob" )), "^bob$" )
+		expect_warning( warningWith( simpleMessage(   "bob" )), "^bob$" )
+		expect_warning( warningWith( simpleCondition( "bob" )), "^bob$" )
+
+		expect_message( messageWith( simpleError(     "bob" )), "^bob$" )
+		expect_message( messageWith( simpleWarning(   "bob" )), "^bob$" )
+		expect_message( messageWith( simpleMessage(   "bob" )), "^bob$" )
+		expect_message( messageWith( simpleCondition( "bob" )), "^bob$" )
+
+	})
+	it( 'Does not preserve class of non-condition objects', {
+		bob <- structure( class="bobbob", list( theBobs=c( "bob", "bob" )))
+		got <- tryCatch(
+			{stopWith( bob ); 42},
+			Bob= function (c) fail('Should not have caught as "Bob"'),
+			error= function (c) {
+				expect_true( inherits(c, "simpleError") && inherits(c, "error")
+								 && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+		got <- tryCatch(
+			{ warningWith( bob ); 42 },
+			Bob= function (c) fail('Should not have caught as "Bob"'),
+			warning= function (c) {
+				expect_true( inherits(c, "simpleWarning") && inherits(c, "warning")
+								 && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+		got <- tryCatch(
+			{ messageWith( bob ); 42 },
+			Bob= function (c) fail('Should not have caught as "Bob"'),
+			message= function (c) {
+				expect_true( inherits(c, "simpleMessage") && inherits(c, "message")
+								 && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+	})
+	it( 'Adds correct classes based on signal, without loosing existing classes' )
+		got <- tryCatch(
+			{stopWith( simpleError("bob") ); 42},
+			error= function (c) {
+				expect_true( inherits(c, "simpleError") && inherits(c, "error")
+								 && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+		got <- tryCatch(
+			{stopWith( simpleWarning("bob") ); 42},
+			error= function (c) {
+				expect_true( inherits(c, "simpleWarning") && inherits(c, "warning")
+								 && inherits(c, "error") && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+		got <- tryCatch(
+			{warningWith( simpleError("bob") ); 42},
+			warning= function (c) {
+				expect_true( inherits(c, "simpleError") && inherits(c, "error")
+								 && inherits(c, "warning") && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+		got <- tryCatch(
+			{warningWith( simpleWarning("bob") ); 42},
+			warning= function (c) {
+				expect_true( inherits(c, "simpleWarning") && inherits(c, "warning")
+								 && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+		got <- tryCatch(
+			{messageWith( simpleWarning("bob") ); 42},
+			message= function (c) {
+				expect_true( inherits(c, "simpleWarning") && inherits(c, "message")
+								 && inherits(c, "warning") && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+		got <- tryCatch(
+			{messageWith( simpleMessage("bob") ); 42},
+			message= function (c) {
+				expect_true( inherits(c, "simpleMessage") && inherits(c, "message")
+								 && inherits(c, "condition" ))
+			}
+		)
+		expect_false( got == 42 )
+})
