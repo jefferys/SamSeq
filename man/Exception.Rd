@@ -12,7 +12,7 @@ Exception(message = "An Exception occurred.", call = sys.calls(),
 }
 \arguments{
 \item{message}{The message associated with the exception. By default this is \code{"An
-Exception occurred."}. \code{conditionMessage(e)} is over-riden for
+Exception occurred."}. \code{conditionMessage(e)} is overridden for
 \code{Exception} and its extensions so that most of the time the
 name of package where the exception was generated will be prepended upon
 access, making the message appear to be \code{"[\var{package}]
