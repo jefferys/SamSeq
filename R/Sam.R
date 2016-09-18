@@ -25,7 +25,7 @@
 #' myReads <- samReads(samObj)
 #' mySource <- samSource(samObj)
 #' @export
-Sam <- function( file ) {
+Sam <- function( file, ... ) {
 
 	# Validate - File exists
    if (! file.exists(file)) {
@@ -59,10 +59,11 @@ Sam <- function( file ) {
 		stopWith( MISSING_HEADER_Exception( path= file ))
 	}
 
+	print( 'Loading Header...' )
 
 	header <- SamHeader( data[1:(readStartLine - 1)] )
-	reads <- SamReads( data[readStartLine:length(data)] )
-	source <- list( file= file, wd= getwd() )
+	reads <- SamReads( data[readStartLine:length(data)], ... )
+	source <- SamSource( file, host= Sys.info()["nodename"], type="file" )
 
    return( structure( class= "Sam", source= source,
    						 list(header=header, reads=reads) ))

@@ -16,4 +16,5 @@ describe( "Can construct a header object", {
 		header <- SamHeader(sam)
 		expect_s3_class(header, "SamHeader")
 	})
+
 })
