@@ -1,49 +1,59 @@
 # Working with sam flags
 
-samFlags <- data.frame(
-	value= c(
-		  1,    2,    4,
-		  8,   16,   32,
-		 64,  128,  256,
-		512, 1024, 2048
-	), description= c(
-		"Template has multiple segments as sequenced (two for paired end sequencing).",
-		"All (both) tempate segments are properly aligned, according to the aligner.",
-		"This segment (this end) of the template is unmapped.",
+BinaryFlagDescriptor <- function(flagDescriptions) {
+	flags <- names(flagDescriptions)
+	if (any(grepl("[a-z]", flags))) {
+		warning( "Flag names have been converted to all upper-case." )
+		flags <- toupper(flags)
+	}
+	# Converting to UC may have made duplicates
+	if (anyDuplicated(flags)) {
+		stop( "Flag names may not contain duplicates" )
+	}
+	# As know all UC, this check is faster
+	if (any(! grepl("^[A-Z][A-Z0-9_]*", flags))) {
+		stop( "Flag names must start with A-Z and contain only A-Z, 0-9, and '_'." )
+	}
 
-		"Next segment (other end) in the template is unmapped.",
-		"SEQ of this seqment (this end) is reverse complemented.",
-		"SEQ of the next segment (other end) in the template is reverse complemented.",
+	return( structure( class=c('BinaryFlagDescriptor', "data.frame"),
+		data.frame(
+			value = 2^(0:(length( flags ) - 1)),
+			description = flagDescriptions,
+			row.names = flags,
+			stringsAsFactors = FALSE
+		)
+	))
+}
 
-		"This is the first segment in the template (first of two ends).",
-		"This is the last segment in the template (second of two ends).",
-		"This is a secondary alignment for this segment (end)",
-
-		"Fails (some) quality control measure.",
-		"Is a PCR or optical duplicate.",
-		"This is a supplementary alignment for this segment (end)."
-	),
-	row.names= c(
-		"READ_PAIRED",          "PROPER_PAIR",         "READ_UNMAPPED",
-		"MATE_UNMAPPED",        "READ_REVERSE_STRAND", "MATE_REVERSE_STRAND",
-		"FIRST_OF_PAIR",        "SECOND_OF_PAIR",      "NOT_PRIMARY_ALIGNMENT",
-		"READ_FAILS_VENDOR_QC", "DUPLICATE_READ",      "SUPPLEMENTARY_ALIGNMENT"
-	),
-	stringsAsFactors = FALSE
+samFlagDescriptions= c(
+	READ_PAIRED= "Template has multiple segments as sequenced (two for paired end sequencing).",
+	PROPER_PAIR= "All (both) tempate segments are properly aligned, according to the aligner.",
+	READ_UNMAPPED= "This segment (this end) of the template is unmapped.",
+	MATE_UNMAPPED= "Next segment (other end) in the template is unmapped.",
+	READ_REVERSE_STRAND= "SEQ of this seqment (this end) is reverse complemented.",
+	MATE_REVERSE_STRAND= "SEQ of the next segment (other end) in the template is reverse complemented.",
+	FIRST_OF_PAIR= "This is the first segment in the template (first of two ends).",
+	SECOND_OF_PAIR= "This is the last segment in the template (second of two ends).",
+	NOT_PRIMARY_ALIGNMENT= "This is a secondary alignment for this segment (end)",
+	READ_FAILS_VENDOR_QC= "Fails (some) quality control measure.",
+	DUPLICATE_READ= "Is a PCR or optical duplicate.",
+	SUPPLEMENTARY_ALIGNMENT= "This is a supplementary alignment for this segment (end)."
 )
+
+samFlagDescriptor <- BinaryFlagDescriptor( samFlagDescriptions )
 
 #' Work with the sam flags field
 #'
 #' A sam flag field represents 12 true or false values as a 12 bit binary
 #' number. This is encoded as the integer equivalent of the binary. The
-#' \code{\link{samFlag}} function supports working with this, returning a named
+#' \code{\link{samFlags}} function supports working with this, returning a named
 #' logical vector decoding a provided int value, or returning the encoded int
 #' value if given a logical vector or a vector of characters that correspond to flag
 #' names. A data frame of names, equivalent integer values, and a short description
-#' can be obtained by calling \code{\link{samFlag}} without a value.
+#' can be obtained by calling \code{\link{samFlags}} without a value.
 #'
 #' @section Flag descriptions:
-#' The data frame returned by calling \code{\link{samFlag}} without a value has
+#' The data frame returned by calling \code{\link{samFlags}} without a value has
 #' one row for each of the 12 flags with the rownames giving the flag name. The
 #' two columns are: \itemize{
 #' 	\item{\code{value} - The integer equivalent to the binary position of the flag,
@@ -72,21 +82,21 @@ samFlags <- data.frame(
 #'
 #' @examples
 #' # Get list of flag names, values, and descriptions
-#' samFlag()
+#' samFlags()
 #' #>         flag value                                            description
 #' #> 1 readPaired     1        Template having multiple segments in sequencing
 #' #> 2 properPair     2 Each segment properly aligned according to the aligner
 #' #> ...
 #'
 #' # Encode sam flags to integer value
-#' samFlag( "readPaired" )
+#' samFlags( "readPaired" )
 #' #> 1
-#' samFlag( c("readPaired", "readUnmapped" ))
+#' samFlags( c("readPaired", "readUnmapped" ))
 #' #> 5
-#' samFlag( "readPaired", "readUnmapped" )
+#' samFlags( "readPaired", "readUnmapped" )
 #' #> 5
 #'
-#' samFlag( 3 )
+#' samFlags( 3 )
 #' #> SUPPLEMENTARY_ALIGNMENT      DUPLICATE_READ READ_FAILS_VENDOR_QC
 #' #>                   FALSE               FALSE                FALSE
 #' #>   NOT_PRIMARY_ALIGNMENT      SECOND_OF_PAIR        FIRST_OF_PAIR
@@ -97,67 +107,97 @@ samFlags <- data.frame(
 #' #>                   FALSE                TRUE                 TRUE
 #'
 #' @export
-samFlag <- function( x, ... ) {
-	UseMethod( "samFlag")
+samFlags <- function( x, ... ) {
+	UseMethod( "samFlags")
 }
 
-#' @rdname samFlag
+#' @rdname samFlags
 #' @export
-samFlag.NULL <- function( x, ... ) {
-	return( samFlags )
+samFlags.NULL <- function( x, ... ) {
+	return( samFlagDescriptor )
 }
 
-#' @rdname samFlag
+#' @rdname samFlags
 #' @export
-samFlag.character <- function( x, ... ) {
-	return( sum( samFlags[ c(x, ...), "value"] ))
+samFlags.character <- function( x, ... ) {
+	return( sum( samFlagDescriptor[ c(x, ...), "value"] ))
 }
 
-#' @rdname samFlag
+#' @rdname samFlags
 #' @export
-samFlag.numeric <- function( x, ... ) {
+samFlags.numeric <- function( x, ... ) {
 	return( rev( setNames(
-		as.logical( bitwAnd(x, samFlags$value)),
-		rownames(samFlags)
+		as.logical( bitwAnd(x, samFlagDescriptor$value)),
+		rownames(samFlagDescriptor)
 	)))
 }
 
-#' Do sam values match selected/unselected flags
+#' Test if sam flags are set or unset.
 #'
-#' Given a vector of sam flag values, return true if the value indicates that
-#' all \code{isFlag} flags are set and that none of the \code{notFlag} flags are
-#' set.
+#' Logically compares one or more sam flags against an encoded sam value.
 #'
-#' @param flagVal A vector of sam flag integer values representin the 12 sam
-#'   read flags.
+#' Note: \code{allSetSamFlags} == \code{! anyUnsetSamFlags}, and
+#' \code{allUnsetSamFlags} == \code{! anySetSamFlags}
 #'
-#' @param isFlag A vector of flag (names) that must be \code{TRUE}, by default
-#'   none. Returns \code{TRUE} only if the \code{flagVal} indicates that all of
-#'   these flags are set.
+#' @param val The encoded sam flag value to check, as a single integer value
 #'
-#' @param isFlag A vector of flag names that must be \code{FALSE}, by default
-#'   none.  Returns \code{TRUE} only if the \code{flagVal} indicates that none
-#'   of these flags are set
+#' @param flags The flags to test, as a character vector.
 #'
-#' @return Returns a logical vector of the same length as \code{flagVal}. TRUE
-#'   if all \code{isFlag} flags are set and no \code{notFlag} flag is set. The
-#'   status of flags listed in neither \code{isFlag} nor \code{notFlag} does not
-#'   matter. Note - if you specify the same flag in both lists, all
-#'   \code{flagVal} are FALSE. If you specify nothing in either, all are TRUE.
-#'   If you specify all flags as either TRUE or FALSE (i.e. no flag is
-#'   ambiguous/unimportant), it would be better to check flagVal ==
-#'   samFlag(isFlag).
+#' @return A single TRUE or FALSE value
 #'
 #' @examples
-#' matchFlags( 1:16, isFlag=  c( "READ_PAIRED", "PROPER_PAIR" ),
-#'                   notFlag= c( "READ_UNMAPPED" ))
-#' #> [1] FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE
-#' #> [9] FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE
+#' # READ_PAIRED = 1, PROPER_PAIR = 2
+#' # All TRUE
+#' allSetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
+#' anySetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
+#' anySetSamFlags( 1 + 2, "READ_PAIRED")
+#' allUnsetSamFlags( 4, c( "READ_PAIRED", "PROPER_PAIR" ))
+#' anyUnsetSamFlags( 1, "PROPER_PAIR" ))
+#' anyUnsetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" ))
+#'
+#' # All FALSE
+#' allSetSamFlags( 1, "PROPER_PAIR" ))
+#' allSetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" ))
+#' anySetSamFlags( 4, c( "READ_PAIRED", "PROPER_PAIR" ))
+#' allUnsetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
+#' allUnsetSamFlags( 1 + 2, "READ_PAIRED" )
+#' anyUnsetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
+#'
+#' @name testSamFlags
+NULL
+## NULL
+
+#' @describeIn testSamFlags TRUE only if all specified flags are set, FALSE if
+#'   any specified flag is unset. The status of unspecified flags does not
+#'   matter.
 #'
 #' @export
-checkSamFlag <- function( flagVal, isFlag= "", notFlag= "" ) {
-	sapply( flagVal, function(x) {
-		all(bitwAnd(x, samFlags$value[ isFlag, ])) &
-		! any(bitwAnd(x, samFlags$value[ notFlag, ]))
-	})
+allSetSamFlags <- function(val, flags) {
+	all(bitwAnd(val, samFlagDescriptor[ flags, "value"]))
+}
+
+#' @describeIn testSamFlags TRUE only if all specified flags are unset, FALSE if
+#'   any specified flags is set. The status of unspecified flags does not
+#'   matter.
+#'
+#' @export
+allUnsetSamFlags <- function(val, flags) {
+	! any(bitwAnd(val, samFlagDescriptor[ flags, "value"]))
+}
+
+#' @describeIn testSamFlags TRUE if any specified flag is set, FALSE only if all
+#'   specified flags are unset. The status of unspecified flags does not matter.
+#'
+#' @export
+anySetSamFlags <- function(val, flags) {
+	any(bitwAnd(val, samFlagDescriptor[ flags, "value"]))
+}
+
+#' @describeIn testSamFlags TRUE if any specified flag is unset, FALSE only if
+#'   all specified flags are set. The status of unspecified flags does not
+#'   matter.
+#'
+#' @export
+anyUnsetSamFlags <- function(val, flags) {
+	! all(bitwAnd(val, samFlagDescriptor[ flags, "value"]))
 }

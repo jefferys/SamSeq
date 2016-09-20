@@ -1,10 +1,17 @@
 context("Testing sam flag coding and decoding")
 
+# Total number of flags
 flagCount <- 12
 
-describe( "samFlag()", {
+# Value if just last flag set
+lastFlag <- 2^(flagCount - 1)
+
+# Value if all flags set
+allFlags <- 2^flagCount - 1
+
+describe( "samFlags()", {
 	describe( "By default provides flag names, values, and descriptions.", {
-		expect_silent( flagDat <- samFlag() );
+		expect_silent( flagDat <- samFlags() );
 
 		it( "Provides a data frame describing (flagCount) flags", {
 			expect_true( is.data.frame(flagDat), "Wanted a data frame" )
@@ -22,51 +29,51 @@ describe( "samFlag()", {
 	})
 	describe( "Returns the flag value corresponding to specified flag names", {
 		it( "Returs the flag's value if just one flag.", {
-			expect_equal( samFlag("READ_PAIRED"), 1 )
-			expect_equal( samFlag("PROPER_PAIR"), 2 )
-			expect_equal( samFlag("SUPPLEMENTARY_ALIGNMENT"), 2^11 )
+			expect_equal( samFlags("READ_PAIRED"), 1 )
+			expect_equal( samFlags("PROPER_PAIR"), 2 )
+			expect_equal( samFlags("SUPPLEMENTARY_ALIGNMENT"), lastFlag )
 		})
 		it( "Returs the sum of the flag's value if more than one flag, specified as 1 vector.", {
-			expect_equal( samFlag(c("READ_PAIRED", "PROPER_PAIR", "SUPPLEMENTARY_ALIGNMENT")),
-							  1 + 2 + 2^11 )
-			expect_equal( samFlag(c("READ_PAIRED", "PROPER_PAIR")), 3 )
+			expect_equal( samFlags(c("READ_PAIRED", "PROPER_PAIR", "SUPPLEMENTARY_ALIGNMENT")),
+							  1 + 2 + lastFlag )
+			expect_equal( samFlags(c("READ_PAIRED", "PROPER_PAIR")), 3 )
 		})
 		it( "Returs the sum of the flag's value if more than one flag, specified as arguments.", {
-			expect_equal( samFlag("READ_PAIRED", "PROPER_PAIR", "SUPPLEMENTARY_ALIGNMENT"),
-							  1 + 2 + 2^11 )
-			expect_equal( samFlag("READ_PAIRED", "PROPER_PAIR"), 3 )
+			expect_equal( samFlags("READ_PAIRED", "PROPER_PAIR", "SUPPLEMENTARY_ALIGNMENT"),
+							  1 + 2 + lastFlag )
+			expect_equal( samFlags("READ_PAIRED", "PROPER_PAIR"), 3 )
 		})
 		it( "returns 0 if no flag specified", {
-			expect_equal( samFlag( character(0) ), 0 )
+			expect_equal( samFlags( character(0) ), 0 )
 		})
 		it( "returns NA if any flag incorrectly specified", {
-			expect_true( is.na(samFlag( c("BOB") )))
-			expect_true( is.na(samFlag( c("READ_PAIRED", "BOB") )))
-			expect_true( is.na(samFlag("BOB" )))
-			expect_true( is.na(samFlag("READ_PAIRED", "BOB" )))
+			expect_true( is.na(samFlags( c("BOB") )))
+			expect_true( is.na(samFlags( c("READ_PAIRED", "BOB") )))
+			expect_true( is.na(samFlags("BOB" )))
+			expect_true( is.na(samFlags("READ_PAIRED", "BOB" )))
 		})
 	})
 	describe( "Returns a logical vector corresponding to a specified flag value.", {
 		it( "Works when only one flag should be true", {
-			got <- samFlag(1)
+			got <- samFlags(1)
 			expect_equal( length(got), flagCount )
 			expect_true( is.logical(got) )
 			expect_equal( which(got), c("READ_PAIRED"=12))
-			got <- samFlag(2)
+			got <- samFlags(2)
 			expect_equal( length(got), flagCount )
 			expect_true( is.logical(got) )
 			expect_equal( which(got), c("PROPER_PAIR"=11))
-			got <- samFlag( 2^11 )
+			got <- samFlags( lastFlag )
 			expect_equal( length(got), flagCount )
 			expect_true( is.logical(got) )
 			expect_equal( which(got), c("SUPPLEMENTARY_ALIGNMENT" = 1))
 		})
 		it( "Works when multiple flags are true", {
-			got <- samFlag(3)
+			got <- samFlags(3)
 			expect_equal( length(got), flagCount )
 			expect_true( is.logical(got) )
 			expect_equal( which(got), c("PROPER_PAIR"=11, "READ_PAIRED"=12))
-			got <- samFlag( 1+2+2^11 )
+			got <- samFlags( 1+2+lastFlag )
 			expect_equal( length(got), flagCount )
 			expect_true( is.logical(got) )
 			expect_equal( which(got),
@@ -74,17 +81,145 @@ describe( "samFlag()", {
 		})
 		it( "Works for out of bounds values", {
 			samFlagVal <- 2^(flagCount + 1)
-			expect_false( any( samFlag( samFlagVal )))
+			expect_false( any( samFlags( samFlagVal )))
 
 			samFlagVal <- 2^(flagCount + 1) + 1
-			got <- samFlag( samFlagVal )
+			got <- samFlags( samFlagVal )
 			expect_equal( length(got), flagCount )
 			expect_true( is.logical(got) )
 			expect_equal( which(got), c("READ_PAIRED"=12))
 
 		})
 		it( "Works for no flags", {
-			expect_false( any(samFlag(0)))
+			expect_false( any(samFlags(0)))
+		})
+	})
+})
+describe( "allSetSamFlags()", {
+	describe( "Is TRUE if all set, whether or not some unspecified are set", {
+		it ("works for single (set) flags", {
+			expect_true( allSetSamFlags( 1,   "READ_PAIRED" ))
+			expect_true( allSetSamFlags( 1+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all set) flags, regardless of order", {
+			expect_true( allSetSamFlags( 1+2,   c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( allSetSamFlags( 1+2,   c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_true( allSetSamFlags( 1+2+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( allSetSamFlags( 1+2+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+	})
+	describe( "Is FALSE if any unset, whether or not some unspecified are set", {
+		it ("works for single unset flags", {
+			expect_false( allSetSamFlags( 0, "READ_PAIRED" ))
+			expect_false( allSetSamFlags( 0+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all unset) flags, regardless of order", {
+			expect_false( allSetSamFlags( 0, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allSetSamFlags( 0, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_false( allSetSamFlags( 4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allSetSamFlags( 4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+		it ("works for multiple (mixed unset/set) flags, regardless of order", {
+			expect_false( allSetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allSetSamFlags( 1, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_false( allSetSamFlags( 1+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allSetSamFlags( 1+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+	})
+})
+describe( "anySetSamFlags()", {
+	describe( "Is TRUE if any set, whether or not some unspecified are set", {
+		it ("works for single set flags", {
+			expect_true( anySetSamFlags( 1, "READ_PAIRED" ))
+			expect_true( anySetSamFlags( 1+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all set) flags, regardless of order", {
+			expect_true( anySetSamFlags( 1+2, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anySetSamFlags( 1+2, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_true( anySetSamFlags( 1+2+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anySetSamFlags( 1+2+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+		it ("works for multiple (mixed unset/set) flags, regardless of order", {
+			expect_true( anySetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anySetSamFlags( 1, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_true( anySetSamFlags( 1+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anySetSamFlags( 1+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+	})
+	describe( "Is FALSE if all unset, whether or not some unspecified are set", {
+		it ("works for single (set) flags", {
+			expect_false( anySetSamFlags( 0,   "READ_PAIRED" ))
+			expect_false( anySetSamFlags( 0+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all unset) flags, regardless of order", {
+			expect_false( anySetSamFlags( 0,   c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( anySetSamFlags( 0,   c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_false( anySetSamFlags( 0+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( anySetSamFlags( 0+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+	})
+})
+describe( "anyUnsetSamFlags()", {
+	describe( "Is TRUE if any unset, whether or not some unspecified are set", {
+		it ("works for single unset flags", {
+			expect_true( anyUnsetSamFlags( 0, "READ_PAIRED" ))
+			expect_true( anyUnsetSamFlags( 0+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all unset) flags, regardless of order", {
+			expect_true( anyUnsetSamFlags( 0, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anyUnsetSamFlags( 0, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_true( anyUnsetSamFlags( 4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anyUnsetSamFlags( 4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+		it ("works for multiple (mixed unset/set) flags, regardless of order", {
+			expect_true( anyUnsetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anyUnsetSamFlags( 1, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_true( anyUnsetSamFlags( 1+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( anyUnsetSamFlags( 1+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+	})
+	describe( "Is FALSE if all set, whether or not some unspecified are set", {
+		it ("works for single (set) flags", {
+			expect_false( anyUnsetSamFlags( 1,   "READ_PAIRED" ))
+			expect_false( anyUnsetSamFlags( 1+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all set) flags, regardless of order", {
+			expect_false( anyUnsetSamFlags( 1+2,   c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( anyUnsetSamFlags( 1+2,   c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_false( anyUnsetSamFlags( 1+2+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( anyUnsetSamFlags( 1+2+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+	})
+})
+describe( "allUnsetSamFlags()", {
+	describe( "Is TRUE if all unset, whether or not some unspecified are set", {
+		it ("works for single (set) flags", {
+			expect_true( allUnsetSamFlags( 0,   "READ_PAIRED" ))
+			expect_true( allUnsetSamFlags( 0+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all unset) flags, regardless of order", {
+			expect_true( allUnsetSamFlags( 0,   c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( allUnsetSamFlags( 0,   c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_true( allUnsetSamFlags( 0+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_true( allUnsetSamFlags( 0+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+	})
+	describe( "Is FALSE if any set, whether or not some unspecified are set", {
+		it ("works for single set flags", {
+			expect_false( allUnsetSamFlags( 1, "READ_PAIRED" ))
+			expect_false( allUnsetSamFlags( 1+2, "READ_PAIRED" ))
+		})
+		it ("works for multiple (all set) flags, regardless of order", {
+			expect_false( allUnsetSamFlags( 1+2, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allUnsetSamFlags( 1+2, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_false( allUnsetSamFlags( 1+2+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allUnsetSamFlags( 1+2+4, c( "PROPER_PAIR", "READ_PAIRED" )))
+		})
+		it ("works for multiple (mixed unset/set) flags, regardless of order", {
+			expect_false( allUnsetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allUnsetSamFlags( 1, c( "PROPER_PAIR", "READ_PAIRED" )))
+			expect_false( allUnsetSamFlags( 1+4, c( "READ_PAIRED", "PROPER_PAIR" )))
+			expect_false( allUnsetSamFlags( 1+4, c( "PROPER_PAIR", "READ_PAIRED" )))
 		})
 	})
 })

@@ -16,6 +16,5 @@ describe( "Can construct a reads object", {
 		reads <- SamReads(sam)
 		expect_s3_class(reads, "SamReads")
 		expect_s3_class(reads, "data.frame")
-		str(reads)
 	})
 })
