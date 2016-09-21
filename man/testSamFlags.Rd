@@ -5,6 +5,7 @@
 \alias{allUnsetSamFlags}
 \alias{anySetSamFlags}
 \alias{anyUnsetSamFlags}
+\alias{matchSamFlags}
 \alias{testSamFlags}
 \title{Test if sam flags are set or unset.}
 \usage{
@@ -15,11 +16,18 @@ allUnsetSamFlags(val, flags)
 anySetSamFlags(val, flags)
 
 anyUnsetSamFlags(val, flags)
+
+matchSamFlags(val, flagVec)
 }
 \arguments{
 \item{val}{The encoded sam flag value to check, as a single integer value}
 
 \item{flags}{The flags to test, as a character vector.}
+
+\item{flagVec}{A logical vector where the names are sam flags and the values
+indicate if that flag shoud be set (\code{TRUE}) or unset (\code{FALSE}). If
+the value of a flag does not matter, it should not be included. NA should
+not be used.}
 }
 \value{
 A single TRUE or FALSE value
@@ -47,6 +55,10 @@ specified flags are unset. The status of unspecified flags does not matter.
 \item \code{anyUnsetSamFlags}: TRUE if any specified flag is unset, FALSE only if
 all specified flags are set. The status of unspecified flags does not
 matter.
+
+\item \code{matchSamFlags}: TRUE if all flags specified as TRUE are set and all
+flags specified as FALSE are unset. The status of unspecified flags does not
+matter.
 }}
 \examples{
 # READ_PAIRED = 1, PROPER_PAIR = 2
@@ -55,16 +67,25 @@ allSetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
 anySetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
 anySetSamFlags( 1 + 2, "READ_PAIRED")
 allUnsetSamFlags( 4, c( "READ_PAIRED", "PROPER_PAIR" ))
-anyUnsetSamFlags( 1, "PROPER_PAIR" ))
+anyUnsetSamFlags( 1, "PROPER_PAIR" )
 anyUnsetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" ))
 
 # All FALSE
-allSetSamFlags( 1, "PROPER_PAIR" ))
+allSetSamFlags( 1, "PROPER_PAIR" )
 allSetSamFlags( 1, c( "READ_PAIRED", "PROPER_PAIR" ))
 anySetSamFlags( 4, c( "READ_PAIRED", "PROPER_PAIR" ))
 allUnsetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
 allUnsetSamFlags( 1 + 2, "READ_PAIRED" )
 anyUnsetSamFlags( 1 + 2, c( "READ_PAIRED", "PROPER_PAIR" ))
 
+goodAlignmentFlagVec <- c(
+	"READ_PAIRED"           =  TRUE, "PROPER_PAIR"             =  TRUE,
+   "READ_UNMAPPED"         = FALSE, "MATE_UNMAPPED"           = FALSE,
+   "NOT_PRIMARY_ALIGNMENT" = FALSE, "READ_FAILS_VENDOR_QC"    = FALSE,
+   "DUPLICATE_READ"        = FALSE, "SUPPLEMENTARY_ALIGNMENT" = FALSE
+)
+matchSamFlags( 1+2, goodAlignmentFlagVec )    # TRUE
+matchSamFlags( 1+2+4, goodAlignmentFlagVec )  # FALSE
+matchSamFlags( 1, goodAlignmentFlagVec )  # FALSE
 }
 
