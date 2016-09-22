@@ -10,7 +10,7 @@ SamHeader(x, ...)
 \item{x}{The object to extract or build a sam header object from. x can be a
 character vector of unparsed header lines, or a Sam object.}
 
-\item{samSource}{The SamSource object to associate with a header. If
+\item{source}{The SamSource object to associate with a header. If
 \code{x} is a Sam object, it will use that objects SamSource, otherwise it
 will use a default \code{SamSource()}}
 }

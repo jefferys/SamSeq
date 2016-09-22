@@ -8,7 +8,7 @@
 \usage{
 SamReads(x, ...)
 
-\method{SamReads}{character}(x, source = SamSource(NULL), withTags = TRUE,
+\method{SamReads}{character}(x, source = SamSource(NULL), splitTags = TRUE,
   ...)
 
 \method{SamReads}{Sam}(x, ...)

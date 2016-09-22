@@ -42,7 +42,7 @@
 #' }
 #' @export
 SamSource <- function (x, ...) {
-	UseMethod("SamSource", x)
+	UseMethod("SamSource")
 }
 
 #' @rdname SamSource
@@ -66,10 +66,19 @@ SamSource.list <- function ( x, ... ) {
 #' @rdname SamSource
 #' @export
 SamSource.Sam <- function ( x, ... ) {
-	return( structure(
-		class="SamSource",
-		attr(x, "source")
-	))
+	return( attr(x, "source") )
+}
+
+#' @rdname SamSource
+#' @export
+SamSource.SamHeader <- function ( x, ... ) {
+	return( attr(x, "source") )
+}
+
+#' @rdname SamSource
+#' @export
+SamSource.SamReads <- function ( x, ... ) {
+	return( attr(x, "source") )
 }
 
 #' @rdname SamSource
@@ -91,7 +100,7 @@ SamSource.NULL <- function ( x, ... ) {
 #'
 #' @export
 samSourceName <- function (x, ...) {
-	UseMethod("samSourceName", x)
+	UseMethod("samSourceName")
 }
 
 #' @rdname samSourceName
@@ -118,7 +127,7 @@ samSourceName.Sam <- function( x, ... ) {
 #'
 #' @export
 samSourceHost <- function (x, ...) {
-	UseMethod("samSourceHost", x)
+	UseMethod("samSourceHost")
 }
 
 #' @rdname samSourceHost
@@ -146,7 +155,7 @@ samSourceHost.Sam <- function( x, ... ) {
 #'
 #' @export
 samSourceType <- function (x, ...) {
-	UseMethod("samSourceType", x)
+	UseMethod("samSourceType")
 }
 
 #' @rdname samSourceType

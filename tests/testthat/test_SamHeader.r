@@ -11,10 +11,8 @@ describe( "Test fixtures for use in the test_sam testthat file", {
 describe( "Can construct a header object", {
 
 	expect_output( sam <- Sam(samFile) )
-
 	it( "Can consturct a header object from a Sam object", {
 		header <- SamHeader(sam)
 		expect_s3_class(header, "SamHeader")
 	})
-
 })

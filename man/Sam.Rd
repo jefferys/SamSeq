@@ -4,10 +4,14 @@
 \alias{Sam}
 \title{Create a sam (sequence alignment/map) object.}
 \usage{
-Sam(file, ...)
+Sam(file, splitTags = TRUE)
 }
 \arguments{
 \item{file}{A *.sam file name.}
+
+\item{splitTags}{Parse optional sam file read tags into columns. True by
+default, but increases processing time a factor of 4 or so. If false will
+have only one "tags" column with a single tab-delimited string.}
 }
 \value{
 An object of class Sam.

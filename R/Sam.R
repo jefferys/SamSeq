@@ -16,6 +16,10 @@
 #'
 #' @param file A *.sam file name.
 #'
+#' @param splitTags Parse optional sam file read tags into columns. True by
+#'   default, but increases processing time a factor of 4 or so. If false will
+#'   have only one "tags" column with a single tab-delimited string.
+#'
 #' @return An object of class Sam.
 #'
 #' @examples
@@ -25,7 +29,7 @@
 #' myReads <- samReads(samObj)
 #' mySource <- samSource(samObj)
 #' @export
-Sam <- function( file, ... ) {
+Sam <- function( file, splitTags= TRUE ) {
 
 	# Validate - File exists
    if (! file.exists(file)) {
@@ -59,13 +63,11 @@ Sam <- function( file, ... ) {
 		stopWith( MISSING_HEADER_Exception( path= file ))
 	}
 
-	print( 'Loading Header...' )
-
-	header <- SamHeader( data[1:(readStartLine - 1)] )
-	reads <- SamReads( data[readStartLine:length(data)], ... )
+	header <- parseSamHeaderLines( data[1:(readStartLine - 1)] )
+	reads <- parseSamReadLines( data[readStartLine:length(data)], splitTags= splitTags )
 	source <- SamSource( file, host= Sys.info()["nodename"], type="file" )
 
-   return( structure( class= "Sam", source= source,
-   						 list(header=header, reads=reads) ))
+   return( structure( class= c("Sam", "list"), source= source,
+   						 .Data=list(header=header, reads=reads) ))
 }
 

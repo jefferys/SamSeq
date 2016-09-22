@@ -33,5 +33,15 @@ describe( "Can construct a source object", {
 		source <- SamSource(sam)
 		expect_s3_class(source, "SamSource")
 	})
+	it( "Can consturct a source object from a SamReads object", {
+		source <- SamSource(SamReads(sam))
+		expect_s3_class(source, "SamSource")
+		expect_equal(source, SamSource(sam))
+	})
+	it( "Can consturct a source object from a SamHeader object", {
+		source <- SamSource(SamHeader(sam))
+		expect_s3_class(source, "SamSource")
+		expect_equal(source, SamSource(sam))
+	})
 })
 

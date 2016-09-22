@@ -4,6 +4,8 @@
 \alias{SamSource}
 \alias{SamSource.NULL}
 \alias{SamSource.Sam}
+\alias{SamSource.SamHeader}
+\alias{SamSource.SamReads}
 \alias{SamSource.character}
 \alias{SamSource.list}
 \title{Create or retrieve \code{SamSource} objects.}
@@ -15,6 +17,10 @@ SamSource(x, ...)
 \method{SamSource}{list}(x, ...)
 
 \method{SamSource}{Sam}(x, ...)
+
+\method{SamSource}{SamHeader}(x, ...)
+
+\method{SamSource}{SamReads}(x, ...)
 
 \method{SamSource}{NULL}(x, ...)
 }
