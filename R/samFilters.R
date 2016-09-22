@@ -28,15 +28,13 @@ pairedReads <- function(sam, paired= TRUE) {
 	#  (for each alignment if more than one). 128 is true for second.
 	if (paired) {
 		sam$reads <- sam$reads[
-			sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag, 64))]
-			& sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag, 128))]
-			, ]
+			sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag, 64))] &
+			sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag, 128))], ]
 	}
 	else {
 		sam$reads <- sam$reads[
-			! sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag,  64))]
-			| ! sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag, 128))]
-			, ]
+			! sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag,  64))] |
+			! sam$reads$qname %in% sam$reads$qname[as.logical(bitwAnd(sam$reads$flag, 128))], ]
 	}
 	sam
 }
@@ -82,11 +80,11 @@ pairedReads <- function(sam, paired= TRUE) {
 samReadFilter <- function( sam, FUNC, ...,
 	.progress= "none", .inform= FALSE, .parallel= FALSE, .paropts= NULL, .id= NA
 ) {
-	sam$reads <- plyr::adply(
-		sam$reads, .margins= 1, FUNC, ...,
+	sam$reads <- sam$reads[plyr::aaply(
+		.data= sam$reads, .margins= 1, .fun= FUNC, ..., .expand= FALSE,
 		.progress= .progress, .inform= .inform, .parallel= .parallel,
-		.paropts= .paropts, .id= .id
-	)
+		.paropts= .paropts
+	), ]
 	sam
 }
 
@@ -165,12 +163,8 @@ pairHasRef <- function(read, ref ) {
 #'
 #' @export
 pairIsChimeric <- function(read, ref1, ref2 ) {
-	if (grepl( ref1, read$rname )) {
-		grepl( ref2, read$rnext )
-	}
-	else {
-	 grepl( ref2, read$rname ) & grepl( ref1, read$rnext )
-	}
+	(grepl( ref1, read$rname ) && grepl( ref2, read$rnext )) ||
+	(grepl( ref2, read$rname ) && grepl( ref1, read$rnext ))
 }
 
 #' @describeIn pairedEndReadTests Identifies paired end reads when both ends are
@@ -253,3 +247,20 @@ areReadFlags <- function( read, flagVec ) {
 	matchSamFlags( read$flag, flagVec )
 }
 
+#' @describeIn readTests Returns \code{TRUE} if the read is aligned to a
+#'   reference identified by the specified regular expressions (matched against
+#'   the reads \code{rname}).
+#'
+#' @export
+readHasRef <- function( read, ref ) {
+	grepl( ref, read$rname )
+}
+
+#' @describeIn readTests Returns \code{TRUE} if the read's mate (other paired
+#'   end) is aligned to a  reference identified by the specified regular
+#'   expressions (matched against the reads \code{rnext}).
+#'
+#' @export
+readMateHasRef <- function( read, ref ) {
+	grepl( ref, read$rnext )
+}

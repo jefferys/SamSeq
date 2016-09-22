@@ -4,6 +4,8 @@
 \alias{areReadFlags}
 \alias{areReadFlagsSet}
 \alias{areReadFlagsUnset}
+\alias{readHasRef}
+\alias{readMateHasRef}
 \alias{readTests}
 \title{Read tests}
 \usage{
@@ -12,6 +14,10 @@ areReadFlagsSet(read, flags)
 areReadFlagsUnset(read, flags)
 
 areReadFlags(read, flagVec)
+
+readHasRef(read, ref)
+
+readMateHasRef(read, ref)
 }
 \arguments{
 \item{read}{The read to test.}
@@ -48,6 +54,14 @@ flagVec are set for the read and all the flags that are unset in the
 flagVec are unset in the read. If all flags in the flagVec checked are set
 or all are unset, it is more efficient to use \code{areReadFlagsSet} or
 \code{areReadFlagsUnset}.
+
+\item \code{readHasRef}: Returns \code{TRUE} if the read is aligned to a
+reference identified by the specified regular expressions (matched against
+the reads \code{rname}).
+
+\item \code{readMateHasRef}: Returns \code{TRUE} if the read's mate (other paired
+end) is aligned to a  reference identified by the specified regular
+expressions (matched against the reads \code{rnext}).
 }}
 \examples{
 \dontrun{
