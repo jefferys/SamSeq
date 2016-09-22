@@ -24,9 +24,9 @@ describe( "Construct the appropriate reads object", {
 
 	it( "Acts as a data frame with the correct columns and rows", {
 		expect_equal(nrow(r), 4)
-		expect_equal(ncol(r), 15)
+		expect_equal(ncol(r), 16)
 		wantNames <- c( "qname", "flag", "rname", "pos", "mapq", "cigar", "rnext",
-							"pnext", "tlen", "seq", "qual", "NH", "HI", "AS", "nM" )
+							"pnext", "tlen", "seq", "qual", "NH", "HI", "AS", "nM", "xT" )
 		expect_equal(names(r), wantNames)
 		expect_equal( class(r[["qname"]]), "character")
 		expect_equal( class(r[["flag"]]), "integer")
@@ -43,5 +43,9 @@ describe( "Construct the appropriate reads object", {
 		expect_equal( class(r[["HI"]]), "integer")
 		expect_equal( class(r[["AS"]]), "integer")
 		expect_equal( class(r[["nM"]]), "integer")
+		expect_equal( class(r[["xT"]]), "character")
+	})
+	it( "Missing values in optional tags become NA's", {
+		expect_equal( r$xT, as.character(c(NA, "Test Me", NA, NA)))
 	})
 })

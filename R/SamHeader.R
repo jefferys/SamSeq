@@ -16,6 +16,14 @@ SamHeader <- function(x, ...) {
 	UseMethod("SamHeader")
 }
 
+#' Parse strings as sam file header lines
+#'
+#' @param x Vector of string, each a sam file header
+#'
+#' @return A data frame with two columns, the first giving the tag name, the
+#' second the original full line. Not the final version of this :)
+#'
+#' @export
 parseSamHeaderLines <- function( x ) {
 	tag= substr(trimws(x), 2, 3)
 	if (any(substr( x, 1, 1 ) != "@")) {

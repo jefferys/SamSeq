@@ -31,12 +31,6 @@ describe( "Loading a simple file from disk", {
 			expect_condition( capture_output(Sam(emptyFile)), "EmptyFileException" )
 		})
 	})
-	describe( "Messages and warnings during succesfull loading.", {
-		it( "Always signal start of loading", {
-#			wantRE <- 	paste0( 'Reading file: \\\\"', samFile, '\\\\". This may take a few seconds.')
-#			expect_output( Sam(samFile), wantRE )
-		})
-	})
    describe( "Sam object structure.", {
 
    	# Gets good sam object for use in rest of test, catches all messages.

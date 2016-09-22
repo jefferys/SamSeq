@@ -14,8 +14,13 @@ SamReads(x, ...)
 \method{SamReads}{Sam}(x, ...)
 }
 \arguments{
-\item{x}{The object to extract or build a sam reads object from. \code{x} can be a
-character vector of unparsed read lines, or a \code{Sam} object.}
+\item{x}{The object to extract or build a sam reads object from. \code{x} can
+be a character vector of unparsed read lines, or a \code{Sam} object.}
+
+\item{splitTags}{By default this is \code{TRUE}, meaning optional read tags are
+split out as named columns. Setting this \code{FALSE} leaves the optional tags as a
+single column, \code{tags}, with all optional tags presented as a single tab
+delimited string.}
 
 \item{samSource}{The SamSource object to associate with the reads. If not
 provided and \code{x} is a \code{Sam} object, it will just use its source.
@@ -23,7 +28,7 @@ For other methods, the default is all missing data, i.e.
 \code{SamSource(NULL)}}
 }
 \value{
-A SamReads object, which is a data frame.
+A SamReads object, which can be used as a data frame.
 }
 \description{
 S3 method that returns an S3 SamReads object, which is a data frame with
