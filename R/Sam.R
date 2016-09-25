@@ -38,7 +38,8 @@ Sam <- function( file, splitTags= TRUE ) {
 
 	# Optimization note - File will be very large. Reading all into memory
 	# first may be too memory expensive.
-	print( 'Reading file: "' %p% file %p% '". This may take a few seconds.' )
+	print( strwrap('Reading file: "' %p% file %p% '". This may take a few seconds.',
+						exdent = 4 ))
 	data <- readLines(file)
 
 	if (length(data) < 1L) {

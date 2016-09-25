@@ -22,7 +22,9 @@ library(SamSeq)
 sample.sam <- system.file( "extData/pe.sam", package = "SamSeq" )
 
 samObj <- Sam( sample.sam )
-#> [1] "Reading file: \"/Users/srj/Library/R/3.3/library/SamSeq/extData/pe.sam\". This may take a few seconds."
+#> [1] "Reading file:"                                                       
+#> [2] "    \"/Users/srj/Library/R/3.3/library/SamSeq/extData/pe.sam\". This"
+#> [3] "    may take a few seconds."                                         
 #> [1] "Loading basic read fields ..."
 #> [1] "Converting optional tags to named list ..."
 #> [1] "Binding optional tags as data frame ..."
