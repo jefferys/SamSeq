@@ -3,13 +3,13 @@
 SamSeq
 ======
 
-Allows loading and working with `*.sam` files, i.e. the format used by SamTools. Tracks header information, reads, and the source of the file. Loads all reads and optionally the extra read tags into S3 objects that are also data frames. This allows easy manipulation and rquires much less overhead than using Bioconductor, but is significantly slower and uses more memory.
+Allows loading and working with `*.sam` files, i.e. the format used by SamTools. Tracks header information, reads, and the source of the file. Loads all reads and optionally the extra read tags into S3 objects that are also data frames. This allows easy manipulation and requires much less overhead than using Bioconductor, but is significantly slower and uses more memory.
 
 Includes functions to translate the Sam flags and to filter reads.
 
 ### Loading a sam file
 
-A `Sam` object is created/constructed by the `Sam()` function, usually by passing it the name of a `*.sam` file as a parameter. From this object, the sam header data can be accessed with `SamHeader()`, the sam read data with `SamRead` and the source information about the sam file with `SamSource()`. The folowing code uses a tiny sam file distributed with this package.
+A `Sam` object is created/constructed by the `Sam()` function, usually by passing it the name of a `*.sam` file as a parameter. From this object, the sam header data can be accessed with `SamHeader()`, the sam read data with `SamRead` and the source information about the sam file with `SamSource()`. The following code uses a tiny sam file distributed with this package.
 
 ``` r
 library(SamSeq)
@@ -43,7 +43,7 @@ class(samSourceObj)
 
 ### SamHeader objects
 
-The SamHeader is not fully parsed at this point, it will probably have a different structure in future. For now it is provided as an object that can be cast to a data frame with two columns: the initial tag as the column `tag`, and the rest of the line as the column `record`.
+The `SamHeader` is not fully parsed at this point, it will probably have a different structure in future. For now it is provided as an object that can be cast to a data frame with two columns: the initial tag as the column `tag`, and the rest of the line as the column `record`.
 
 ``` r
 samHeaderObj <- SamHeader( samObj )
@@ -114,7 +114,7 @@ areReadTagsParsed(samReadsObj) == areReadTagsParsed(samObj)
 #> [1] TRUE
 ```
 
-If `splitTags= TRU`E is set when reading in the file with `Sam()`, tags will be left as a single unparsed `tags` column with values the uparsed tags delimited by embedded tabs. You might want to leave the optional tags unparsed if you don't need them as parsing them makes reading the file 4 times slower.
+If `splitTags= TRU`E is set when reading in the file with `Sam()`, tags will be left as a single unparsed `tags` column with values the unparsed tags delimited by embedded tabs. You might want to leave the optional tags unparsed if you don't need them as parsing them makes reading the file 4 times slower.
 
 ``` r
 rawTagsSamObj <- Sam( sample.sam, splitTags = FALSE )
@@ -167,9 +167,9 @@ identical( samFileSourceObj, samReadsSourceObj)
 #> [1] TRUE
 ```
 
-A SamSource object has accessors `samSourceName()`, `samSourceHost()`, and `samSourceType()` which return the name of the file read, the name of machine with the file, and the type of access used to get the data, respectively. Currently the only type of access is `file`. A possible future type might be `url`.
+A `SamSource` object has accessors `samSourceName()`, `samSourceHost()`, and `samSourceType()` which return the name of the file read, the name of machine with the file, and the type of access used to get the data, respectively. Currently the only type of access is `file`. A possible future type might be `url`.
 
-The accessors can be applied directly to the `Sam`, `SamHeader`, and `SamReads` objects, or indeed any object for which SamSource(x) is defined.
+The accessors can be applied directly to the `Sam`, `SamHeader`, and `SamReads` objects, or indeed any object for which `SamSource(x)` is defined.
 
 ``` r
 samSource <- SamSource( samObj )
