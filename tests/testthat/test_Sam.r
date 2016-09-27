@@ -33,8 +33,11 @@ describe( "Loading a simple file from disk", {
 	})
    describe( "Sam object structure.", {
 
-   	# Gets good sam object for use in rest of test, catches all messages.
    	expect_output( sam <- Sam(samFile) )
+      it( "Is a sam object", {
+      	expect_s3_class(sam, "Sam")
+      })
+      expect_output( sam <- Sam(samFile, splitTags = FALSE) )
       it( "Is a sam object", {
       	expect_s3_class(sam, "Sam")
       })

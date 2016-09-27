@@ -4,6 +4,7 @@
 \alias{SamReads}
 \alias{SamReads.Sam}
 \alias{SamReads.character}
+\alias{as.data.frame.SamReads}
 \title{Return a SamReads object}
 \usage{
 SamReads(x, ...)
@@ -12,10 +13,14 @@ SamReads(x, ...)
   ...)
 
 \method{SamReads}{Sam}(x, ...)
+
+\method{as.data.frame}{SamReads}(x, ...)
 }
 \arguments{
-\item{x}{The object to extract or build a sam reads object from. \code{x} can
-be a character vector of unparsed read lines, or a \code{Sam} object.}
+\item{x}{For \code{SamHeader()}, the object to extract or build a sam reads
+object from. It can be a character vector of unparsed read lines, or
+a \code{Sam} object. For \code{as.data.frame()}, it can only be a
+\code{SamReads} object.}
 
 \item{...}{Required for S3 object method implementation. Not currently used.}
 
@@ -24,13 +29,18 @@ provided and \code{x} is a \code{Sam} object, it will just use its source.
 For other methods, the default is all missing data, i.e.
 \code{SamSource(NULL)}}
 
-\item{splitTags}{By default this is \code{TRUE}, meaning optional read tags are
-split out as named columns. Setting this \code{FALSE} leaves the optional tags as a
-single column, \code{tags}, with all optional tags presented as a single tab
-delimited string.}
+\item{splitTags}{By default this is \code{TRUE}, meaning optional read tags
+are split out as named columns. Setting this \code{FALSE} leaves the
+optional tags as a single column, \code{tags}, with all optional tags
+presented as a single tab delimited string.}
 }
 \value{
-A SamReads object, which can be used as a data frame.
+For \code{SamReads}, a \code{SamReads} object.
+
+  For \code{as.data.frame} a data frame as returned by
+  \code{parseSamReadLines}, with either parsed tags or a tags field,
+  whichever was used to create the SamReads object. Can use
+  \code{isTagsParsed(SamHeader)} to check.
 }
 \description{
 S3 method that returns an S3 SamReads object, which is a data frame with

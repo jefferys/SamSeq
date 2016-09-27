@@ -6,6 +6,7 @@
 \alias{SamSource.Sam}
 \alias{SamSource.SamHeader}
 \alias{SamSource.SamReads}
+\alias{SamSource.SamSource}
 \alias{SamSource.character}
 \alias{SamSource.list}
 \title{Create or retrieve \code{SamSource} objects.}
@@ -17,6 +18,8 @@ SamSource(x, ...)
 \method{SamSource}{list}(x, ...)
 
 \method{SamSource}{Sam}(x, ...)
+
+\method{SamSource}{SamSource}(x, ...)
 
 \method{SamSource}{SamHeader}(x, ...)
 

@@ -2,11 +2,11 @@ context("Testing sam filters")
 
 samFile <- file.path( "goodSamFiles", "pe.sam" )
 expect_output( sam <- Sam(samFile) )
-reads <- SamReads(sam)
+reads <- as.data.frame(SamReads(sam))
 
 describe( "samReadFilter", {
 	it( "Returns a sam object", {
-		readName <- SamReads(sam)[1,"qname"]
+		readName <- reads[1,"qname"]
 		got <- samReadFilter( sam, function(x) {x$qname == readName} )
 		expect_s3_class( got, "Sam" )
 		expect_s3_class( SamReads(got), "SamReads" )
@@ -14,8 +14,8 @@ describe( "samReadFilter", {
 		expect_s3_class( SamSource(got), "SamSource" )
 	})
 	it( "Reads are returned only where function returns TRUE", {
-		readName <- SamReads(sam)[1,"qname"]
-		got <- SamReads(samReadFilter( sam, function(x) {x$qname == readName} ))
+		readName <- reads[1,"qname"]
+		got <- as.data.frame(SamReads(samReadFilter( sam, function(x) {x$qname == readName} )))
 		expect_true(nrow(got) < nrow(reads), "Filtered something")
 		want <- reads[reads[, "qname"] == readName, ]
 		expect_equivalent( got, want, "Read DF should be the same, but not attr." )
@@ -38,7 +38,8 @@ describe( "Tests that may not preserve read pairs", {
 
 		})
 		it( "Works as a filter", {
-			got <- SamReads( samReadFilter( sam, "areReadFlagsSet", "FIRST_OF_PAIR" ))
+			got <- as.data.frame( SamReads(
+				samReadFilter( sam, "areReadFlagsSet", "FIRST_OF_PAIR" )))
 			want <- reads[c(1,3),]
 			expect_equal(got, want)
 		})
@@ -57,7 +58,8 @@ describe( "Tests that may not preserve read pairs", {
 			expect_false(areReadFlagsUnset(reads[4,], c("SECOND_OF_PAIR")))
 		})
 		it( "Works as a filter", {
-			got <- SamReads( samReadFilter( sam, "areReadFlagsUnset", "FIRST_OF_PAIR" ))
+			got <- as.data.frame( SamReads( samReadFilter(
+				sam, "areReadFlagsUnset", "FIRST_OF_PAIR" )))
 			want <- reads[c(2,4),]
 			expect_equal(got, want)
 		})
@@ -102,8 +104,8 @@ describe( "Tests that may not preserve read pairs", {
 											  c( "READ_UNMAPPED"= TRUE, "SECOND_OF_PAIR"= FALSE )))
 		})
 		it( "Works as a filter", {
-			got <- SamReads( samReadFilter( sam, "areReadFlags",
-									c( "FIRST_OF_PAIR"= TRUE, "SECOND_OF_PAIR"= FALSE )))
+			got <- as.data.frame( SamReads( samReadFilter( sam, "areReadFlags",
+									c( "FIRST_OF_PAIR"= TRUE, "SECOND_OF_PAIR"= FALSE ))))
 			want <- reads[c(1,3),]
 			expect_equal(got, want)
 		})
@@ -236,44 +238,44 @@ describe( "pairedReads", {
 
 		sam2 <- sam
 		sam2$reads[1,"flag"] <- samFlags("READ_PAIRED")
-		unfilteredReads <- SamReads(sam2)
+		unfilteredReads <- as.data.frame(SamReads(sam2))
 		name <- sam2$reads[1,"qname"]
 		got <- pairedReads(sam2)
-		filteredReads <- SamReads(got)
+		filteredReads <- as.data.frame(SamReads(got))
 		expect_equal( nrow(filteredReads), 2 )
 		expect_equal( filteredReads[1,], unfilteredReads[3,] )
 		expect_equal( filteredReads[2,], unfilteredReads[4,] )
 
 		sam2 <- sam
 		sam2$reads[4,"flag"] <- samFlags("READ_PAIRED")
-		unfilteredReads <- SamReads(sam2)
+		unfilteredReads <- as.data.frame(SamReads(sam2))
 		name <- sam2$reads[4,"qname"]
 		got <- pairedReads(sam2)
-		filteredReads <- SamReads(got)
+		filteredReads <- as.data.frame(SamReads(got))
 		expect_equal( nrow(filteredReads), 2 )
 		expect_equal( filteredReads[1,], unfilteredReads[1,] )
 		expect_equal( filteredReads[2,], unfilteredReads[2,] )
 	})
 	describe( "Keeps only unpaired reads if paired=TRUE is set", {
 		got <- pairedReads(sam, paired = FALSE)
-		expect_equal(nrow(SamReads(got)), 0)
+		expect_equal(nrow(as.data.frame(SamReads(got))), 0)
 
 		sam2 <- sam
 		sam2$reads[1,"flag"] <- samFlags("READ_PAIRED")
-		unfilteredReads <- SamReads(sam2)
+		unfilteredReads <- as.data.frame(SamReads(sam2))
 		name <- sam2$reads[1,"qname"]
 		got <- pairedReads(sam2, paired = FALSE)
-		filteredReads <- SamReads(got)
+		filteredReads <- as.data.frame(SamReads(got))
 		expect_equal( nrow(filteredReads), 2 )
 		expect_equal( filteredReads[1,], unfilteredReads[1,] )
 		expect_equal( filteredReads[2,], unfilteredReads[2,] )
 
 		sam2 <- sam
 		sam2$reads[4,"flag"] <- samFlags("READ_PAIRED")
-		unfilteredReads <- SamReads(sam2)
+		unfilteredReads <- as.data.frame(SamReads(sam2))
 		name <- sam2$reads[4,"qname"]
 		got <- pairedReads(sam2, paired = FALSE)
-		filteredReads <- SamReads(got)
+		filteredReads <- as.data.frame(SamReads(got))
 		expect_equal( nrow(filteredReads), 2 )
 		expect_equal( filteredReads[1,], unfilteredReads[3,] )
 		expect_equal( filteredReads[2,], unfilteredReads[4,] )

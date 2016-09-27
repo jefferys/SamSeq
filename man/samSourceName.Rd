@@ -2,20 +2,12 @@
 % Please edit documentation in R/SamSource.R
 \name{samSourceName}
 \alias{samSourceName}
-\alias{samSourceName.Sam}
-\alias{samSourceName.SamSource}
 \title{SamSource name data accessor}
 \usage{
-samSourceName(x, ...)
-
-\method{samSourceName}{SamSource}(x, ...)
-
-\method{samSourceName}{Sam}(x, ...)
+samSourceName(x)
 }
 \arguments{
-\item{x}{Can be a Sam or SamSource object.}
-
-\item{...}{Required for S3 object method implementation. Not currently used.}
+\item{x}{Any object for which \code{SamSource(x)} is defined.}
 }
 \value{
 The name of the source sam data file as a character vector.

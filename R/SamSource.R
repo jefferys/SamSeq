@@ -71,6 +71,12 @@ SamSource.Sam <- function ( x, ... ) {
 
 #' @rdname SamSource
 #' @export
+SamSource.SamSource <- function ( x, ... ) {
+	return( x )
+}
+
+#' @rdname SamSource
+#' @export
 SamSource.SamHeader <- function ( x, ... ) {
 	return( attr(x, "source") )
 }
@@ -94,27 +100,13 @@ SamSource.NULL <- function ( x, ... ) {
 #'
 #' Accessor to extract the name of the sam file data was taken from.
 #'
-#' @param x Can be a Sam or SamSource object.
-#'
-#' @param ... Required for S3 object method implementation. Not currently used.
+#' @param x Any object for which \code{SamSource(x)} is defined.
 #'
 #' @return The name of the source sam data file as a character vector.
 #'
 #' @export
-samSourceName <- function (x, ...) {
-	UseMethod("samSourceName")
-}
-
-#' @rdname samSourceName
-#' @export
-samSourceName.SamSource <- function( x, ... ) {
-	return(x$name)
-}
-
-#' @rdname samSourceName
-#' @export
-samSourceName.Sam <- function( x, ... ) {
-	return(x$source$name)
+samSourceName <- function (x) {
+	return( SamSource(x)$name )
 }
 
 #' SamSource host data accessor
@@ -122,28 +114,14 @@ samSourceName.Sam <- function( x, ... ) {
 #' Accessor to extract the name of the host machine where the sam file the data
 #' was taken from resides.
 #'
-#' @param x Can be a Sam or SamSource object.
-#'
-#' @param ... Required for S3 object method implementation. Not currently used.
+#' @param x Any object for which \code{SamSource(x)} is defined.
 #'
 #' @return The name name of the host machine where the sam file the data was
 #'   taken from resides as a character vector.
 #'
 #' @export
-samSourceHost <- function (x, ...) {
-	UseMethod("samSourceHost")
-}
-
-#' @rdname samSourceHost
-#' @export
-samSourceHost.SamSource <- function( x, ... ) {
-	return(x$host)
-}
-
-#' @rdname samSourceHost
-#' @export
-samSourceHost.Sam <- function( x, ... ) {
-	return(x$source$host)
+samSourceHost <- function (x) {
+	return( SamSource(x)$host )
 }
 
 #' SamSource data type accessor
@@ -151,29 +129,13 @@ samSourceHost.Sam <- function( x, ... ) {
 #' Accessor to extract the type of access required for the sam file the data was
 #' taken from resides.
 #'
-#' @param x Can be a Sam or SamSource object.
-#'
-#' @param ... Required for S3 object method implementation. Not currently used.
+#' @param x Any object for which \code{SamSource(x)} is defined.
 #'
 #' @return The type of access required for the sam file the data was taken from,
 #'   as a character vector. Can only be "file" currently. "url" is a likely
 #'   future extension.
 #'
 #' @export
-samSourceType <- function (x, ...) {
-	UseMethod("samSourceType")
+samSourceType <- function (x) {
+	return( SamSource(x)$type )
 }
-
-#' @rdname samSourceType
-#' @export
-samSourceType.SamSource <- function( x, ... ) {
-	return(x$type)
-}
-
-#' @rdname samSourceType
-#' @export
-samSourceType.Sam <- function( x, ... ) {
-	return(x$source$type)
-}
-
-

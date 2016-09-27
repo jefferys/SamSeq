@@ -2,20 +2,12 @@
 % Please edit documentation in R/SamSource.R
 \name{samSourceType}
 \alias{samSourceType}
-\alias{samSourceType.Sam}
-\alias{samSourceType.SamSource}
 \title{SamSource data type accessor}
 \usage{
-samSourceType(x, ...)
-
-\method{samSourceType}{SamSource}(x, ...)
-
-\method{samSourceType}{Sam}(x, ...)
+samSourceType(x)
 }
 \arguments{
-\item{x}{Can be a Sam or SamSource object.}
-
-\item{...}{Required for S3 object method implementation. Not currently used.}
+\item{x}{Any object for which \code{SamSource(x)} is defined.}
 }
 \value{
 The type of access required for the sam file the data was taken from,

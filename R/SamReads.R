@@ -5,22 +5,29 @@
 #' S3 method that returns an S3 SamReads object, which is a data frame with
 #' additional meta data.
 #'
-#' @param x The object to extract or build a sam reads object from. \code{x} can
-#'   be a character vector of unparsed read lines, or a \code{Sam} object.
+#' @param x For \code{SamHeader()}, the object to extract or build a sam reads
+#'   object from. It can be a character vector of unparsed read lines, or
+#'   a \code{Sam} object. For \code{as.data.frame()}, it can only be a
+#'   \code{SamReads} object.
 #'
 #' @param source The SamSource object to associate with the reads. If not
 #'   provided and \code{x} is a \code{Sam} object, it will just use its source.
 #'   For other methods, the default is all missing data, i.e.
 #'   \code{SamSource(NULL)}
 #'
-#' @param splitTags By default this is \code{TRUE}, meaning optional read tags are
-#' split out as named columns. Setting this \code{FALSE} leaves the optional tags as a
-#' single column, \code{tags}, with all optional tags presented as a single tab
-#' delimited string.
+#' @param splitTags By default this is \code{TRUE}, meaning optional read tags
+#'   are split out as named columns. Setting this \code{FALSE} leaves the
+#'   optional tags as a single column, \code{tags}, with all optional tags
+#'   presented as a single tab delimited string.
 #'
 #' @param ... Required for S3 object method implementation. Not currently used.
 #'
-#' @return A SamReads object, which can be used as a data frame.
+#' @return For \code{SamReads}, a \code{SamReads} object.
+#'
+#'   For \code{as.data.frame} a data frame as returned by
+#'   \code{parseSamReadLines}, with either parsed tags or a tags field,
+#'   whichever was used to create the SamReads object. Can use
+#'   \code{isTagsParsed(SamHeader)} to check.
 #'
 #' @export
 SamReads <- function (x, ...) {
@@ -109,9 +116,9 @@ parseSamReadLines <- function( lines, splitTags= TRUE ) {
 	}
 	else {
 		# May have problems with readList line with no tags.
-		return( dplyr::bind_cols( data, tags= sapply( readList, function(x) {
+		return( dplyr::bind_cols( data, data.frame(tags= sapply( readList, function(x) {
 			paste(x[ c( 12:max(12,length( x )))], collapse="\t")
-		})))
+		}), stringsAsFactors = FALSE)))
 	}
 }
 
@@ -119,8 +126,9 @@ parseSamReadLines <- function( lines, splitTags= TRUE ) {
 #' @export
 SamReads.character <- function( x, source= SamSource(NULL), splitTags= TRUE, ... ) {
 	return( structure(
-		class=c("SamReads", "data.frame"), source= source,
-		parseSamReadLines( x, splitTags= splitTags )
+		class="SamReads", source= source,
+		list( reads= parseSamReadLines( x, splitTags= splitTags ),
+				areReadTagsParsed= splitTags )
 	))
 }
 
@@ -128,7 +136,13 @@ SamReads.character <- function( x, source= SamSource(NULL), splitTags= TRUE, ...
 #' @export
 SamReads.Sam <- function( x, ... ) {
 	return( structure(
-		class= c("SamReads", "data.frame"), source= attr(x, "source"),
-		x$reads
+		class= "SamReads", source= attr(x, "source"),
+		list( reads= x$reads,  areReadTagsParsed= x$areReadTagsParsed)
 	))
+}
+
+#' @rdname SamReads
+#' @export
+as.data.frame.SamReads <- function( x, ... ) {
+	return( x$reads )
 }

@@ -10,8 +10,9 @@ parseSamHeaderLines(x)
 \item{x}{Vector of string, each a sam file header}
 }
 \value{
-A data frame with two columns, the first giving the tag name, the
-second the original full line. Not the final version of this :)
+A SamHeader data frame. Currently this has only two columns, the
+  first giving the tag name, the second the original full line. Not the final
+  version of this.
 }
 \description{
 Parse strings as sam file header lines

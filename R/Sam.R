@@ -67,10 +67,14 @@ Sam <- function( file, splitTags= TRUE ) {
 	}
 
 	header <- parseSamHeaderLines( data[1:(readStartLine - 1)] )
+
 	reads <- parseSamReadLines( data[readStartLine:length(data)], splitTags= splitTags )
-	source <- SamSource( file, host= Sys.info()["nodename"], type="file" )
+	host <- Sys.info()["nodename"]
+	names(host) <- NULL
+	source <- SamSource( file, host= host, type="file" )
 
    return( structure( class= c("Sam", "list"), source= source,
-   						 .Data=list(header=header, reads=reads) ))
+   						 .Data=list(header=header, areHeaderTagsParsed= FALSE,
+   						 			  reads=reads,areReadTagsParsed= splitTags) ))
 }
 

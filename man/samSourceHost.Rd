@@ -2,20 +2,12 @@
 % Please edit documentation in R/SamSource.R
 \name{samSourceHost}
 \alias{samSourceHost}
-\alias{samSourceHost.Sam}
-\alias{samSourceHost.SamSource}
 \title{SamSource host data accessor}
 \usage{
-samSourceHost(x, ...)
-
-\method{samSourceHost}{SamSource}(x, ...)
-
-\method{samSourceHost}{Sam}(x, ...)
+samSourceHost(x)
 }
 \arguments{
-\item{x}{Can be a Sam or SamSource object.}
-
-\item{...}{Required for S3 object method implementation. Not currently used.}
+\item{x}{Any object for which \code{SamSource(x)} is defined.}
 }
 \value{
 The name name of the host machine where the sam file the data was
