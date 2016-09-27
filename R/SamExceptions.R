@@ -11,8 +11,8 @@
 #'   over-ridden for \code{Exception} subclasses.
 #' @param call The call or call stack associated with the exception. By default
 #'   this is NULL as \code{IOException}s are usually environment problems. Can
-#'   be overridden to provide the \code{\link{Sys.calls}} call stack or a single
-#'   \code{\link{Sys.call}}.
+#'   be overridden to provide the \code{\link{sys.calls}} call stack or a single
+#'   \code{\link{sys.call}}.
 #' @param package The package where this exception is generated. May be
 #'   \code{NULL} when exceptions are generated and signaled from interactive or
 #'   script level code and not from a package. Attempts to guess the package by
@@ -87,14 +87,11 @@ HeaderOnlyMsg <- function( path= NA, wd= getwd() ) {
 #'    "DataException", "Exception", "condition" )}
 #' }
 #'
-#' @usage \code{ SamFileFormatException( path = NA, line = NA, data = NA,
-#'    message = *, call = NULL, package = packageName(), ...)}
-#'
 #' @export
 SamFileFormatException <- function( path=NA, line=NA, data=NA,
-	message= SamFileFormatMsg( path=path, line=line, data=data ),
-	call= NULL, package= packageName(), ...
+	message= "*", call= NULL, package= packageName(), ...
 ) {
+	if (message == "*") {message <- SamFileFormatMsg( path=path, line=line, data=data) }
 	ffEx <- FileFormatException( message=message, call= call, package= package,
 		data=data, path=path, line=line, ... )
 	extendException( "SamFileFormatException", ffEx )
@@ -111,14 +108,11 @@ SamFileFormatException <- function( path=NA, line=NA, data=NA,
 #'    "FileFormatException", "DataException", "Exception", "condition" )}
 #' }
 #'
-#' @usage \code{ SamFileHeaderException( path = NA, line = NA, data = NA,
-#'    message = *, call = NULL, package = packageName(), ...)}
-#'
 #' @export
 SamFileHeaderException <- function( path=NA, line=NA, data=NA,
-	message= SamFileHeaderMsg(line=line, path=path, data=data),
-	call= NULL, package= packageName(), ...
+	message= "*", call= NULL, package= packageName(), ...
 ) {
+	if (message == "*") {message <- SamFileHeaderMsg(line=line, path=path, data=data) }
 	sfhEx <- SamFileFormatException( message=message, call= call, package= package,
 										 data=data, path=path, line=line, ... )
 	extendException( "SamFileHeaderException", sfhEx )
@@ -136,14 +130,11 @@ SamFileHeaderException <- function( path=NA, line=NA, data=NA,
 #'    "FileFormatException", "DataException", "Exception", "condition" )}
 #' }
 #'
-#' @usage \code{ SamFileReadException( path = NA, line = NA, data = NA,
-#'    message = *, call = NULL, package = packageName(), ...)}
-#'
 #' @export
 SamFileReadException <- function( path=NA, line=NA, data=NA,
-	message= SamFileReadMsg( line=line, path=path, data=data),
-	call= NULL, package= packageName(), ...
+	message= "*", call= NULL, package= packageName(), ...
 ) {
+	if (message == "*") {message <- SamFileReadMsg( line=line, path=path, data=data) }
 	sfrEx <- SamFileFormatException( message=message, call= call, package= package,
 												data=data, path=path, line=line, ... )
 	extendException( "SamFileReadException", sfrEx )
@@ -161,13 +152,12 @@ SamFileReadException <- function( path=NA, line=NA, data=NA,
 #'    "SamFileHeaderException", "SamFileFormatException", "FileFormatException",
 #'    "DataException", "Exception", "condition" )}
 #' }
-#' @usage \code{ MISSING_HEADER_Exception( path = NA, line = NA, data = NA,
-#'    message = *, call = NULL, package = packageName(), ...)}
 #'
 #' @export
 MISSING_HEADER_Exception <- function( path=NA, data=NA, line=NA,
-	message= MISSING_HEADER_Msg( path= path ), call= NULL, package= packageName(), ...
+	message= "*", call= NULL, package= packageName(), ...
 ) {
+	if (message == "*") {message <- MISSING_HEADER_Msg( path= path ) }
 	sfhEx <- SamFileHeaderException( message=message, call= call, package= package,
 												path=path, data=data, line=line, ... )
 	extendException( "MISSING_HEADER_Exception", sfhEx )
@@ -186,13 +176,12 @@ MISSING_HEADER_Exception <- function( path=NA, data=NA, line=NA,
 #'    "SamFileReadException", "SamFileFormatException", "FileFormatException",
 #'    "DataException", "Exception", "condition" )}
 #' }
-#' @usage \code{ HeaderOnlyException( path = NA, line = NA, data = NA,
-#'    message = *, call = NULL, package = packageName(), ...)}
 #'
 #' @export
 HeaderOnlyException <- function( path=NA, data=NA, line= NA,
-	message= HeaderOnlyMsg( path= path ), call= NULL, package= packageName(), ...
+	message= "*", call= NULL, package= packageName(), ...
 ) {
+	if (message == "*") {message <- HeaderOnlyMsg( path= path ) }
 	sfrEx <- SamFileReadException( message=message, call= call, package= package,
 				path=path, data=data, line=line, ... )
 	extendException( "HeaderOnlyException", sfrEx )

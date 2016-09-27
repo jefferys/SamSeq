@@ -49,7 +49,7 @@ SamSource <- function (x, ...) {
 #' @export
 SamSource.character <- function ( x, host=NA, type=NA, ... ) {
 	return( structure(
-		class="SamSource",
+		class=c("SamSource", "list"),
 		list( name=x, host=host, type=type )
 	))
 }
@@ -58,7 +58,7 @@ SamSource.character <- function ( x, host=NA, type=NA, ... ) {
 #' @export
 SamSource.list <- function ( x, ... ) {
 	return( structure(
-		class="SamSource",
+		class=c("SamSource", "list"),
 		list( name=x$name, host=x$host, type=x$type )
 	))
 }
@@ -85,7 +85,7 @@ SamSource.SamReads <- function ( x, ... ) {
 #' @export
 SamSource.NULL <- function ( x, ... ) {
 	return( structure(
-		class="SamSource",
+		class=c("SamSource", "list"),
 		list( name=NA, host=NA, type=NA )
 	))
 }
@@ -95,6 +95,8 @@ SamSource.NULL <- function ( x, ... ) {
 #' Accessor to extract the name of the sam file data was taken from.
 #'
 #' @param x Can be a Sam or SamSource object.
+#'
+#' @param ... Required for S3 object method implementation. Not currently used.
 #'
 #' @return The name of the source sam data file as a character vector.
 #'
@@ -122,6 +124,8 @@ samSourceName.Sam <- function( x, ... ) {
 #'
 #' @param x Can be a Sam or SamSource object.
 #'
+#' @param ... Required for S3 object method implementation. Not currently used.
+#'
 #' @return The name name of the host machine where the sam file the data was
 #'   taken from resides as a character vector.
 #'
@@ -148,6 +152,8 @@ samSourceHost.Sam <- function( x, ... ) {
 #' taken from resides.
 #'
 #' @param x Can be a Sam or SamSource object.
+#'
+#' @param ... Required for S3 object method implementation. Not currently used.
 #'
 #' @return The type of access required for the sam file the data was taken from,
 #'   as a character vector. Can only be "file" currently. "url" is a likely

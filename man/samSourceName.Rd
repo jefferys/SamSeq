@@ -14,6 +14,8 @@ samSourceName(x, ...)
 }
 \arguments{
 \item{x}{Can be a Sam or SamSource object.}
+
+\item{...}{Required for S3 object method implementation. Not currently used.}
 }
 \value{
 The name of the source sam data file as a character vector.

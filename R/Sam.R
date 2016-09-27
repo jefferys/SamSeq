@@ -23,11 +23,13 @@
 #' @return An object of class Sam.
 #'
 #' @examples
-#' samObj <- sam( 'myFile.sam' )
+#' \dontrun{
+#' samObj <- Sam( 'myFile.sam' )
 #'
 #' myHeader <- samHeader(samObj)
 #' myReads <- samReads(samObj)
 #' mySource <- samSource(samObj)
+#' }
 #' @export
 Sam <- function( file, splitTags= TRUE ) {
 

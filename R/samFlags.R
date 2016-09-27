@@ -126,7 +126,7 @@ samFlags.character <- function( x, ... ) {
 #' @rdname samFlags
 #' @export
 samFlags.numeric <- function( x, ... ) {
-	return( rev( setNames(
+	return( rev( stats::setNames(
 		as.logical( bitwAnd(x, samFlagDescriptor$value)),
 		rownames(samFlagDescriptor)
 	)))

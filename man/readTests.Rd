@@ -29,6 +29,12 @@ the flags set or unset for a read.}
 indicate if that flag shoud be set (\code{TRUE}) or unset (\code{FLAG}). If
 the value of a flag does not matter, it should not be included. NA should not
 be used.}
+
+\item{ref}{Regular expression matched against the reference aligned to.
+Keeps a read if \code{ref} matches to the reference this read aligns to
+(\code{readHasRef()}, matching against \code{rname}) or the reference the
+mate of this read aligns to (\code{readMateHasRef()}, matching against
+\code{rnext}).}
 }
 \value{
 Returns \code{TRUE} if a read passes the test, \code{FALSE} otherwise.

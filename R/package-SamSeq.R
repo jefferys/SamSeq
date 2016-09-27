@@ -9,5 +9,6 @@
 #'
 #' @import Exception
 #' @importFrom JefferysRUtils %p% %pp% expect_equalOrNull
+#' @importFrom utils packageName
 NULL
 # NULL

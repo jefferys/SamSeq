@@ -32,10 +32,12 @@ name applied to the \code{Sam} object. Any function that works when applied
 to a component object will work on the \code{Sam} object too.
 }
 \examples{
-samObj <- sam( 'myFile.sam' )
+\dontrun{
+samObj <- Sam( 'myFile.sam' )
 
 myHeader <- samHeader(samObj)
 myReads <- samReads(samObj)
 mySource <- samSource(samObj)
+}
 }
 

@@ -8,7 +8,7 @@
 #' @param x The object to extract or build a sam reads object from. \code{x} can
 #'   be a character vector of unparsed read lines, or a \code{Sam} object.
 #'
-#' @param samSource The SamSource object to associate with the reads. If not
+#' @param source The SamSource object to associate with the reads. If not
 #'   provided and \code{x} is a \code{Sam} object, it will just use its source.
 #'   For other methods, the default is all missing data, i.e.
 #'   \code{SamSource(NULL)}
@@ -17,6 +17,8 @@
 #' split out as named columns. Setting this \code{FALSE} leaves the optional tags as a
 #' single column, \code{tags}, with all optional tags presented as a single tab
 #' delimited string.
+#'
+#' @param ... Required for S3 object method implementation. Not currently used.
 #'
 #' @return A SamReads object, which can be used as a data frame.
 #'
@@ -47,7 +49,7 @@ parseSamReadTags <- function( tagList, startAt= 12 ) {
 	print( 'Converting optional tags to named list ...' )
 	namedTagLists <- lapply(tagList, function(x) {
 		x <- x[ c( startAt:max(startAt,length( x )))]
-		setNames(
+		stats::setNames(
 			as.list(sub("^..:[AifZHB]?:?\\s*(.*)\\s*", "\\1", x)),
 			sub("^\\s*(..):([AifZHB]?).*", "\\1\\.\\2", x)
 		)

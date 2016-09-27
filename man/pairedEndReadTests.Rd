@@ -9,9 +9,9 @@
 \alias{pairedEndReadTests}
 \title{Paired-end read tests}
 \usage{
-pairIsAligned(read, primary.only = FALSE)
+pairIsAligned(read)
 
-pairIsPrimary(read, primary.only = FALSE)
+pairIsPrimary(read)
 
 pairHasRef(read, ref)
 

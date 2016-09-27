@@ -11,6 +11,8 @@
 #' \code{x} is a Sam object, it will use that objects SamSource, otherwise it
 #' will use a default \code{SamSource()}
 #'
+#' @param ... Required for S3 object method implementation. Not currently used.
+#'
 #' @export
 SamHeader <- function(x, ...) {
 	UseMethod("SamHeader")
@@ -34,12 +36,13 @@ parseSamHeaderLines <- function( x ) {
 	}
 	data.frame(
 		tag=tag,
-		record = trimws(sub("^@..:", "", x)),
+		record = trimws(sub("^@..\\t", "", x)),
 		row.names= 1:length(x),
 		stringsAsFactors = FALSE
 	)
 }
 
+#' @rdname SamHeader
 #' @export
 SamHeader.character <- function( x, source= SamSource(NULL), ... ) {
 	return( structure(
@@ -48,11 +51,12 @@ SamHeader.character <- function( x, source= SamSource(NULL), ... ) {
 	))
 }
 
+#' @rdname SamHeader
 #' @export
 SamHeader.Sam <- function( x, ... ) {
 
 	return( structure(
-		class= "SamHeader", source= attr(x, "source"),
+		class= c("SamHeader", "data.frame"), source= attr(x, "source"),
 		x$header
 	))
 }

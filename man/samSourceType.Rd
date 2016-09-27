@@ -14,6 +14,8 @@ samSourceType(x, ...)
 }
 \arguments{
 \item{x}{Can be a Sam or SamSource object.}
+
+\item{...}{Required for S3 object method implementation. Not currently used.}
 }
 \value{
 The type of access required for the sam file the data was taken from,

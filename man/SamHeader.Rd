@@ -2,13 +2,21 @@
 % Please edit documentation in R/SamHeader.R
 \name{SamHeader}
 \alias{SamHeader}
+\alias{SamHeader.Sam}
+\alias{SamHeader.character}
 \title{Return a SamHeader object}
 \usage{
 SamHeader(x, ...)
+
+\method{SamHeader}{character}(x, source = SamSource(NULL), ...)
+
+\method{SamHeader}{Sam}(x, ...)
 }
 \arguments{
 \item{x}{The object to extract or build a sam header object from. x can be a
 character vector of unparsed header lines, or a Sam object.}
+
+\item{...}{Required for S3 object method implementation. Not currently used.}
 
 \item{source}{The SamSource object to associate with a header. If
 \code{x} is a Sam object, it will use that objects SamSource, otherwise it

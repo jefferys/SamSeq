@@ -17,16 +17,15 @@ or \code{NA}.}
 
 \item{...}{Other parameters to pass to \code{FUNC}.}
 
-\item{.progress}{Progress bar; see \code{\link{plyr::adply}}.}
+\item{.progress}{Progress bar; see \code{\link[plyr]{adply}}.}
 
-\item{.inform}{Extra error handling; see \code{\link{plyr::adply}}.}
+\item{.inform}{Extra error handling; see \code{\link[plyr]{adply}}.}
 
-\item{.parallel}{Use the parallel package; see \code{\link{plyr::adply}}.}
+\item{.parallel}{Use the parallel package; see \code{\link[plyr]{adply}}.}
 
-\item{.paropts}{Options if using the parallel package; see
-\code{\link{plyr::adply}}.}
+\item{.paropts}{Options if using the parallel package; see \code{\link[plyr]{adply}}.}
 
-\item{.id}{Id column; see \code{\link{plyr::adply}}.}
+\item{.id}{Id column; see \code{\link[plyr]{adply}}.}
 }
 \value{
 A sam object with only the reads that passed the filter \code{FUNC}.
@@ -34,9 +33,9 @@ A sam object with only the reads that passed the filter \code{FUNC}.
 \description{
 Apply a filter to a sam object, returing a new sam object with the sam header
 but only containing the reads for which the filter \code{FUNC} returns
-\code{TRUE}. Uses \code{\link{plyr}} to apply this filter to each read
+\code{TRUE}. Uses \code{\link[plyr]{adply}} to apply this filter to each read
 alignment. Many of the parameters are just pass-through parameters for
-\code{\link{plyr::adply}}. These all begin with a "\code{.}" to distinguish
+\code{\link[plyr]{adply}}. These all begin with a "\code{.}" to distinguish
 them from potential parameters to the function as they come after the
 \code{...} in the function definition. No attempt is made to keep or delete
 both ends of a paired end read if one end passes and one end fails the

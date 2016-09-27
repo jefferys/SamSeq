@@ -14,6 +14,8 @@ samSourceHost(x, ...)
 }
 \arguments{
 \item{x}{Can be a Sam or SamSource object.}
+
+\item{...}{Required for S3 object method implementation. Not currently used.}
 }
 \value{
 The name name of the host machine where the sam file the data was

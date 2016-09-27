@@ -9,12 +9,14 @@ Description: Work with the aligned read data as provided in a *.sam file, as in
  file. Loads all reads and optionally the extra read tags. Includes functions to
  translate the Sam flags and to filter reads.
 License: MIT + file LICENSE
-LazyData: TRUE
-RoxygenNote: 5.0.1
 Remotes: github::jefferys/JefferysRUtils,
   github::jefferys/Exception
 Imports: data.table,
-	 plyr
+	 plyr,
+	 JefferysRUtils,
+	 Exception
 Suggests: testthat,
     knitr,
     rmarkdown
+LazyData: TRUE
+RoxygenNote: 5.0.1

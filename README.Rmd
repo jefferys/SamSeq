@@ -22,7 +22,7 @@ Includes functions to translate the Sam flags and to filter reads.
 
 ### Loading a sam file
 
-A `Sam` object is created/constructed by the `Sam()` function, usually by passing it the name of a `*.sam` file as a parameter. This object is a list with a `SamHeader` and a `SamRead` object, and has a `SamSource` object as an attribute. These can be accessed directly but should use the accessor/creator methods of hte same name as the object classes. The folowing code uses a tiny sam file distributed with this package.
+A `Sam` object is created/constructed by the `Sam()` function, usually by passing it the name of a `*.sam` file as a parameter. This object is a list with a `SamHeader` and a `SamRead` object, and has a `SamSource` object as an attribute. These can be accessed directly but should use the accessor/creator methods of the same name as the object classes. The folowing code uses a tiny sam file distributed with this package.
 
 ```{r}
 library(SamSeq)
@@ -36,13 +36,31 @@ samObj <- Sam( sample.sam )
 class(samObj)
 names(samObj)
 names(attributes(samObj))
+```
 
-# Header and Read objects are also data frames
+The SamHeader and SamReads objects are also data frames, the SamSource object
+is also a list.
+
+```{r}
 samHeaderObj <- SamHeader( samObj )
 class(samHeaderObj)
 samReadsObj <- SamReads( samObj )
 class(samReadsObj)
 samSourceObj <- SamSource( samObj )
 class(samSourceObj)
+```
+
+### SamHeader objects
+
+The SamHeader is not fully parsed at this point, it will probably have a different structure in future. For now it is provided as a data frame with only two columns: the initial tag is parsed, as the column `tag`, and the rest of the line is provided uparsed, as the column `record`.
+
+The problem yet to be determined is how to split the contents when some header lines use tabs for delimiters and others can contain embedded unquoted tabs. Probably some form of parameter object that will allow specifying, on a per tag basis, what to do.
+
+```{r}
+samHeaderObj <- SamHeader( samObj )
+names(samHeaderObj)
+samHeaderObj[1, ]
+samHeaderObj$tag
+samHeaderObj[samHeaderObj$tag == "SQ", "record" ]
 ```
 

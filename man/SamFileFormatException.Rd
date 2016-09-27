@@ -8,20 +8,20 @@
 \alias{SamFileReadException}
 \title{Sam format exceptions}
 \usage{
-\code{ SamFileFormatException( path = NA, line = NA, data = NA,
-   message = *, call = NULL, package = packageName(), ...)}
+SamFileFormatException(path = NA, line = NA, data = NA, message = "*",
+  call = NULL, package = packageName(), ...)
 
-\code{ SamFileHeaderException( path = NA, line = NA, data = NA,
-   message = *, call = NULL, package = packageName(), ...)}
+SamFileHeaderException(path = NA, line = NA, data = NA, message = "*",
+  call = NULL, package = packageName(), ...)
 
-\code{ SamFileReadException( path = NA, line = NA, data = NA,
-   message = *, call = NULL, package = packageName(), ...)}
+SamFileReadException(path = NA, line = NA, data = NA, message = "*",
+  call = NULL, package = packageName(), ...)
 
-\code{ MISSING_HEADER_Exception( path = NA, line = NA, data = NA,
-   message = *, call = NULL, package = packageName(), ...)}
+MISSING_HEADER_Exception(path = NA, data = NA, line = NA, message = "*",
+  call = NULL, package = packageName(), ...)
 
-\code{ HeaderOnlyException( path = NA, line = NA, data = NA,
-   message = *, call = NULL, package = packageName(), ...)}
+HeaderOnlyException(path = NA, data = NA, line = NA, message = "*",
+  call = NULL, package = packageName(), ...)
 }
 \arguments{
 \item{path}{The path associated with an exception, as a one element character
@@ -44,8 +44,8 @@ over-ridden for \code{Exception} subclasses.}
 
 \item{call}{The call or call stack associated with the exception. By default
 this is NULL as \code{IOException}s are usually environment problems. Can
-be overridden to provide the \code{\link{Sys.calls}} call stack or a single
-\code{\link{Sys.call}}.}
+be overridden to provide the \code{\link{sys.calls}} call stack or a single
+\code{\link{sys.call}}.}
 
 \item{package}{The package where this exception is generated. May be
 \code{NULL} when exceptions are generated and signaled from interactive or

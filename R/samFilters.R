@@ -43,9 +43,9 @@ pairedReads <- function(sam, paired= TRUE) {
 #'
 #' Apply a filter to a sam object, returing a new sam object with the sam header
 #' but only containing the reads for which the filter \code{FUNC} returns
-#' \code{TRUE}. Uses \code{\link{plyr}} to apply this filter to each read
+#' \code{TRUE}. Uses \code{\link[plyr]{adply}} to apply this filter to each read
 #' alignment. Many of the parameters are just pass-through parameters for
-#' \code{\link{plyr::adply}}. These all begin with a "\code{.}" to distinguish
+#' \code{\link[plyr]{adply}}. These all begin with a "\code{.}" to distinguish
 #' them from potential parameters to the function as they come after the
 #' \code{...} in the function definition. No attempt is made to keep or delete
 #' both ends of a paired end read if one end passes and one end fails the
@@ -59,12 +59,11 @@ pairedReads <- function(sam, paired= TRUE) {
 #'   \code{sam} object, or \code{FALSE} if not. Should never return \code{NULL}
 #'   or \code{NA}.
 #' @param ... Other parameters to pass to \code{FUNC}.
-#' @param .progress Progress bar; see \code{\link{plyr::adply}}.
-#' @param .inform Extra error handling; see \code{\link{plyr::adply}}.
-#' @param .parallel Use the parallel package; see \code{\link{plyr::adply}}.
-#' @param .paropts Options if using the parallel package; see
-#'   \code{\link{plyr::adply}}.
-#' @param .id Id column; see \code{\link{plyr::adply}}.
+#' @param .progress Progress bar; see \code{\link[plyr]{adply}}.
+#' @param .inform Extra error handling; see \code{\link[plyr]{adply}}.
+#' @param .parallel Use the parallel package; see \code{\link[plyr]{adply}}.
+#' @param .paropts Options if using the parallel package; see \code{\link[plyr]{adply}}.
+#' @param .id Id column; see \code{\link[plyr]{adply}}.
 #'
 #' @return A sam object with only the reads that passed the filter \code{FUNC}.
 #'
@@ -97,6 +96,7 @@ samReadFilter <- function( sam, FUNC, ...,
 #' application.
 #'
 #' @param read The read to test.
+#'
 #' @param ref Regular expression matched against the reference this and/or the
 #'   other end aligns too. Keeps a read if \code{ref} matches to either
 #'   (\code{rname}) or (\code{rnext}) or both.
@@ -133,7 +133,7 @@ NULL
 #' or both ends.
 #'
 #' @export
-pairIsAligned <- function(read, primary.only = FALSE) {
+pairIsAligned <- function(read) {
 	allUnsetSamFlags(read$flag, c("READ_UNMAPPED", "MATE_UNMAPPED"))
 }
 
@@ -142,7 +142,7 @@ pairIsAligned <- function(read, primary.only = FALSE) {
 #' READ_UNMAPPED, MATE_UNMAPPED, and NOT_PRIMARY_ALIGNMENT flags.
 #'
 #' @export
-pairIsPrimary <- function(read, primary.only = FALSE) {
+pairIsPrimary <- function(read) {
 	allUnsetSamFlags(read$flag, c("READ_UNMAPPED", "MATE_UNMAPPED", "NOT_PRIMARY_ALIGNMENT"))
 }
 
@@ -186,6 +186,11 @@ pairIsNotChimeric <- function(read, ref) {
 #' of these as filters.
 #'
 #' @param read The read to test.
+#' @param ref Regular expression matched against the reference aligned to.
+#' Keeps a read if \code{ref} matches to the reference this read aligns to
+#' (\code{readHasRef()}, matching against \code{rname}) or the reference the
+#' mate of this read aligns to (\code{readMateHasRef()}, matching against
+#' \code{rnext}).
 #' @param flags A character vector of one or more flag names to test against
 #' the flags set or unset for a read.
 #' @param flagVec A logical vector where the names are sam flags and the values
