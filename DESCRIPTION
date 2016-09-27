@@ -13,6 +13,7 @@ Remotes: github::jefferys/JefferysRUtils,
   github::jefferys/Exception
 Imports: data.table,
 	 plyr,
+	 dplyr,
 	 JefferysRUtils,
 	 Exception
 Suggests: testthat,

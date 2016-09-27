@@ -105,10 +105,11 @@ parseSamReadLines <- function( lines, splitTags= TRUE ) {
 		stringsAsFactors = FALSE
 	)
 	if (splitTags) {
-		return(cbind(data, parseSamReadTags( readList )))
+		return(dplyr::bind_cols(data, parseSamReadTags( readList )))
 	}
 	else {
-		return( cbind( data, tags= sapply( readList, function(x) {
+		# May have problems with readList line with no tags.
+		return( dplyr::bind_cols( data, tags= sapply( readList, function(x) {
 			paste(x[ c( 12:max(12,length( x )))], collapse="\t")
 		})))
 	}
