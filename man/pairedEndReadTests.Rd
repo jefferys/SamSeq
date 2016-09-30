@@ -15,21 +15,18 @@ pairIsPrimary(read)
 
 pairHasRef(read, ref)
 
-pairIsChimeric(read, ref1, ref2)
+pairIsChimeric(read, ref, altRef = NULL)
 
 pairIsNotChimeric(read, ref)
 }
 \arguments{
 \item{read}{The read to test.}
 
-\item{ref}{Regular expression matched against the reference this and/or the
-other end aligns too. Keeps a read if \code{ref} matches to either
-(\code{rname}) or (\code{rnext}) or both.}
+\item{ref}{Regular expression matched against the reference that this end
+and/or the other end aligns to. Keeps a read if \code{ref} matches to
+either (\code{rname}) and/or (\code{rnext}).}
 
-\item{ref1}{Regular expression that matches the chromosome/reference name
-of one end, either \code{rname} or \code{rnext}. Should not match both.}
-
-\item{ref2}{Reqular expression that matches the chromosome/reference name of
+\item{altRef}{Reqular expression that matches the chromosome/reference name of
 whichever end \code{ref1} does not match.}
 }
 \value{
@@ -61,8 +58,9 @@ matches it.
 
 \item \code{pairIsChimeric}: Identifies paired end reads when one end is
 aligned to one reference or chromosome and the other end to a different
-one. Takes two regular expressions, and will return TRUE only if one read
-end matches the first expression and the other read end matches the second.
+one. Takes one or two regular expressions, and will return TRUE only if one read
+end matches the first expression and the other read end does not, or if \code{altRef}
+is specified if the other end matches that.
 
 \item \code{pairIsNotChimeric}: Identifies paired end reads when both ends are
 aligned to the same reference or chromosome and the other end to a different

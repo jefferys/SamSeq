@@ -194,26 +194,46 @@ describe( "Tests preserving read pairs", {
 		})
 	})
 	describe( "pairIsChimeric", {
-		it( "Returns TRUE if rname and rnext match different REs", {
-			read <- reads[1,]
-			read$rname <- "chr1"; read$rnext <- "chr12"
-			expect_true( pairIsChimeric( read, "chr1$", "chr12$" ))
-			expect_true( pairIsChimeric( read, "chr12$", "chr1$" ))
+		describe( "pairIsChimeric, both specified", {
+			it( "Returns TRUE if rname and rnext match different REs", {
+				read <- reads[1,]
+				read$rname <- "chr1"; read$rnext <- "chr12"
+				expect_true( pairIsChimeric( read, "chr1$", "chr12$" ))
+				expect_true( pairIsChimeric( read, "chr12$", "chr1$" ))
+			})
+			it( "Returns FALSE if both only match same name", {
+				read <- reads[1,]
+				read$rname <- "chr1"; read$rnext <- "chr12"
+				expect_false( pairIsChimeric( read, "chr1$", "chr.$" ))
+				expect_false( pairIsChimeric( read, "chr12", "chr.2" ))
+			})
+			it( "Returns FALSE if one or both matches no name", {
+				read <- reads[1,]
+				read$rname <- "chr1"; read$rnext <- "chr12"
+				expect_false( pairIsChimeric( read, "chr1$", "chr3" ))
+				expect_false( pairIsChimeric( read, "chr3", "chr1$" ))
+				expect_false( pairIsChimeric( read, "chr12", "bob" ))
+				expect_false( pairIsChimeric( read, "bob", "chr12" ))
+				expect_false( pairIsChimeric( read, "me", "you" ))
+			})
 		})
-		it( "Returns FALSE if both only match same name", {
-			read <- reads[1,]
-			read$rname <- "chr1"; read$rnext <- "chr12"
-			expect_false( pairIsChimeric( read, "chr1$", "chr.$" ))
-			expect_false( pairIsChimeric( read, "chr12", "chr.2" ))
-		})
-		it( "Returns FALSE if one or both matches no name", {
-			read <- reads[1,]
-			read$rname <- "chr1"; read$rnext <- "chr12"
-			expect_false( pairIsChimeric( read, "chr1$", "chr3" ))
-			expect_false( pairIsChimeric( read, "chr3", "chr1$" ))
-			expect_false( pairIsChimeric( read, "chr12", "bob" ))
-			expect_false( pairIsChimeric( read, "bob", "chr12" ))
-			expect_false( pairIsChimeric( read, "me", "you" ))
+		describe( "pairIsChimeric, one read specified", {
+			it( "Returns TRUE if rname or rnext matches, but not both", {
+				read <- reads[1,]
+				read$rname <- "chr1"; read$rnext <- "chr12"
+				expect_true( pairIsChimeric( read, "chr1$" ))
+				expect_true( pairIsChimeric( read, "chr12$"))
+			})
+			it( "Returns FALSE if match both rname and rnext", {
+				read <- reads[1,]
+				read$rname <- "chr1"; read$rnext <- "chr12"
+				expect_false( pairIsChimeric( read, "^chr1" ))
+			})
+			it( "Returns FALSE if doesn't match", {
+				read <- reads[1,]
+				read$rname <- "chr1"; read$rnext <- "chr12"
+				expect_false( pairIsChimeric( read, "bob" ))
+			})
 		})
 	})
 	describe( "pairIsNotChimeric", {

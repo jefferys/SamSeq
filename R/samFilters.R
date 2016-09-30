@@ -97,12 +97,10 @@ samReadFilter <- function( sam, FUNC, ...,
 #'
 #' @param read The read to test.
 #'
-#' @param ref Regular expression matched against the reference this and/or the
-#'   other end aligns too. Keeps a read if \code{ref} matches to either
-#'   (\code{rname}) or (\code{rnext}) or both.
-#' @param ref1 Regular expression that matches the chromosome/reference name
-#'   of one end, either \code{rname} or \code{rnext}. Should not match both.
-#' @param ref2 Reqular expression that matches the chromosome/reference name of
+#' @param ref Regular expression matched against the reference that this end
+#'   and/or the other end aligns to. Keeps a read if \code{ref} matches to
+#'   either (\code{rname}) and/or (\code{rnext}).
+#' @param altRef Reqular expression that matches the chromosome/reference name of
 #'   whichever end \code{ref1} does not match.
 #'
 #' @return Returns \code{TRUE} if a read passes the test, \code{FALSE}
@@ -158,13 +156,21 @@ pairHasRef <- function(read, ref ) {
 
 #' @describeIn pairedEndReadTests Identifies paired end reads when one end is
 #'   aligned to one reference or chromosome and the other end to a different
-#'   one. Takes two regular expressions, and will return TRUE only if one read
-#'   end matches the first expression and the other read end matches the second.
+#'   one. Takes one or two regular expressions, and will return TRUE only if one read
+#'   end matches the first expression and the other read end does not, or if \code{altRef}
+#'   is specified if the other end matches that.
 #'
 #' @export
-pairIsChimeric <- function(read, ref1, ref2 ) {
-	(grepl( ref1, read$rname ) && grepl( ref2, read$rnext )) ||
-	(grepl( ref2, read$rname ) && grepl( ref1, read$rnext ))
+pairIsChimeric <- function(read, ref, altRef=NULL ) {
+	if (is.null(altRef)) {
+		(grepl( ref, read$rname ) && ! grepl( ref, read$rnext )) ||
+		(grepl( ref, read$rnext ) && ! grepl( ref, read$rname ))
+
+	}
+	else {
+		(grepl( ref, read$rname ) && grepl( altRef, read$rnext )) ||
+		(grepl( altRef, read$rname ) && grepl( ref, read$rnext ))
+	}
 }
 
 #' @describeIn pairedEndReadTests Identifies paired end reads when both ends are
