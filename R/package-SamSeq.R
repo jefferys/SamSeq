@@ -5,10 +5,10 @@
 #' Loads all reads and optionally the extra read tags. Includes functions to
 #' translate the Sam flags and to filter reads.
 #'
-#' @name package-SamSeq
+#' @name SamSeq
+#' @docType package
 #'
 #' @import Exception
 #' @importFrom JefferysRUtils %p% %pp% expect_equalOrNull
 #' @importFrom utils packageName
 NULL
-# NULL
