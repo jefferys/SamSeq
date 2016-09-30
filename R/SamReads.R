@@ -146,3 +146,32 @@ SamReads.Sam <- function( x, ... ) {
 as.data.frame.SamReads <- function( x, ... ) {
 	return( x$reads )
 }
+
+#' Read statistics
+#'
+#' @param x A \code{Sam} or \code{SamReads} object to return read statistics for.
+#'
+#' Returns the number of lines of reads in the Sam file. Does no filtering, so
+#' counts a multi-aligned read end once for each alignment and includes
+#' duplicates, unaligned reads, failed QC alignments, etc. Can filter and then
+#' re-apply to get any sub-scount desired. Dividing by 2 does not convert to
+#' paired end results as some ends may match more or less times than another.
+#'
+#' @param ... Required for S3 object method implementation. Not currently used.
+#'
+#' @return The total number of read records in the Sam file object.
+#'
+#' @export
+countAllReads <- function(x, ...) {
+	UseMethod("countAllReads")
+}
+
+#' @export
+countAllReads.Sam <- function(x, ...) {
+	return( countAllReads( SamReads( x )))
+}
+
+#' @export
+countAllReads.SamReads <- function(x, ...) {
+	return( nrow( x$reads ))
+}

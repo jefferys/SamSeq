@@ -87,3 +87,11 @@ describe( "Construct the appropriate reads object without parsed tags", {
 		expect_equal( length( unlist( strsplit( r$tags[2], split= "\t" ))), 5 )
 	})
 })
+
+describe( "countAllReads", {
+	it( "Returns the number of reads expected", {
+		expect_output( sam <- Sam(samFile) )
+		expect_equal( countAllReads( sam ), 4 )
+		expect_equal( countAllReads( SamReads( sam )), 4 )
+	})
+})
