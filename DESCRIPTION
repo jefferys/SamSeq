@@ -1,7 +1,7 @@
 Package: SamSeq
 Type: Package
 Title: Work with aligned reads from a SAM file
-Version: 0.0.1
+Version: 0.0.1-9000
 Author: Stuart R. Jefferys
 Maintainer: Stuart R. Jefferys <srj@unc.edu>
 Description: Work with the aligned read data as provided in a *.sam file, as in
