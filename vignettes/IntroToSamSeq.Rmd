@@ -1,0 +1,86 @@
+---
+title: "Introduction to SamSeq"
+author: "Stuart R. Jefferys"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to SamSeq}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# 1. Overview
+
+## 1.1 Why this package?
+
+The SamSeq package is designed to work with SAM format files using pure R code and S3 objects. This is not the most efficient way to do things, but is much simpler to understand and modify. In a perfect world, the Samtools package would do everything we need without having to resort to add-on functionality. Unfortunately it does a poor job with mate-pairs, which is almost all sequencing these days. There is also the RSamTools bioconductor package, but that requires a large number of other bioconductor packages and an understanding of S4 classes and the bioconductor universe to use.
+
+## 2 The main elements
+
+The `Sam` S3 class is the core of the package. Objects of class `Sam` are initially created by reading a sam file. The object can be explored through various functions including `SamHeader`, which extracts the header, `SamReads`, which extracts the reads, `samFlags` which decodes a flag value into named logical vectors, and `SamSource` which extracts the filename and other information about the source of a Sam object
+
+### 2.1 SamSeq()
+
+```{r}
+library("SamSeq")
+samFile <- system.file( "extdata", "pe.sam", package= "SamSeq" )
+samObj <- Sam( samFile )
+```
+
+### 2.2 SamHeader()
+
+```{r}
+headerObj <- SamHeader( samObj )
+df <- as.data.frame(headerObj)
+knitr::kable(df)
+```
+
+### 2.3 SamReads()
+
+```{r}
+readsObj <- SamReads( samObj )
+df <- as.data.frame(readsObj)
+knitr::kable(df)
+```
+
+### 2.3 SamFlags()
+
+```{r}
+df <- as.data.frame(readsObj)
+flag <- df$flag[1]
+flag
+samFlags(flag)
+decodedFlags <- sapply( df$flag, samFlags )
+colnames(decodedFlags) <- df$flag
+knitr::kable(decodedFlags)
+```
+
+### 2.4 SamSource()
+
+```{r}
+sourceInfo <- SamSource( samObj )
+as.list(sourceInfo)
+```
+
+## 3 Filtering
+
+One of the main things we want to do with a sam file is to filter a subset of aligned reads. Samtools can do this directly with simple filters, and such simple filtering can be composed in steps, but it is more convenient to define a filter once and then apply it, if not necessarily more efficient. The main filtering function in SamSeq is `samReadMatch` which takes a sam file and a filter function name as its main parameters and returns a logical vector with `TRUE` for each read matching the filter and `FALSE` otherwise. The filter function is any function that takes a single read as its first parameter and returns TRUE if that read passes the filter, false otherwise. Parameters are passed through to the filter function, except for a few optional parameters that begin with "." and are used by `samReadMatch` itself.
+
+Two convenience functions are similar to `samReadMatch`. Function `samReadCount` returns just the count of matching reads, while `samReadFilter` returns a Sam object dropping the matched reads.
+
+### 3.1 Simple use of samReadFilter
+
+```{r}
+samReadMatch( samObj, pairIsChimeric, ref= 'chr22' )
+samReadCount( samObj, pairIsChimeric, ref= 'chr22' )
+filteredSam <- samReadFilter( samObj, pairIsChimeric, ref= 'chr22' )
+knitr::kable(as.data.frame(SamReads(filteredSam)))
+```
+
+### 3.1 Filters that preserve pairs
+
+### 3.2 Filters that will split pairs
+
+### 3.3 Writing custom filters
+
+Filter functions take a single read as their first parameter and return a single Boolean, `TRUE` if a read should be kept, `FALSE` if not. It should never return `NULL` or `NA`. Other parameters are passed through to the filter function if needed, except for the parameters used by the samReadFilter function itself (which all start with ".") to control optional features of the filtering function (e.g. reporting progress, or processing in parallel).
