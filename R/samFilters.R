@@ -6,7 +6,7 @@
 #' ends.
 #'
 #' This allows dropping unpaired reads after filtering that might only drop one
-#' read of a pair, such a filtering by quality.
+#' read of a pair, such as filtering by quality.
 #'
 #' @param sam The Sam object to filter.
 #'
@@ -79,12 +79,114 @@ pairedReads <- function(sam, paired= TRUE) {
 samReadFilter <- function( sam, FUNC, ...,
 	.progress= "none", .inform= FALSE, .parallel= FALSE, .paropts= NULL, .id= NA
 ) {
-	sam$reads <- sam$reads[plyr::aaply(
+	sam$reads <- sam$reads[ samReadMatch( sam, FUNC, ...,
+			.progress= .progress, .inform= .inform, .parallel= .parallel,
+			.paropts= .paropts, .id= .id ), ]
+	sam
+}
+
+# Old implementation, save until new implementation tested, then delete!
+######
+# samReadFilter <- function( sam, FUNC, ...,
+# 	.progress= "none", .inform= FALSE, .parallel= FALSE, .paropts= NULL, .id= NA
+# ) {
+# 	sam$reads <- sam$reads[plyr::aaply(
+# 		.data= sam$reads, .margins= 1, .fun= FUNC, ..., .expand= FALSE,
+# 		.progress= .progress, .inform= .inform, .parallel= .parallel,
+# 		.paropts= .paropts
+# 	), ]
+# 	sam
+# }
+######
+
+#' Count reads meeting filter criteria
+#'
+#' Apply a filter to a sam object and count the reads for which the filter
+#' \code{FUNC} returns \code{TRUE}. Uses \code{\link[plyr]{adply}} to apply this
+#' filter to each read alignment. Many of the parameters are just pass-through
+#' parameters for \code{\link[plyr]{adply}}. These all begin with a "\code{.}"
+#' to distinguish them from potential parameters to the function as they come
+#' after the \code{...} in the function definition. No attempt is made to keep
+#' or delete both ends of a paired end read if one end passes and one end fails
+#' the filter.
+#'
+#' @param sam A Sam object
+#' @param FUNC A function whose first parameter is a single read and that
+#'   returns a single \code{TRUE} if that read should be kept when filtering the
+#'   \code{sam} object, or \code{FALSE} if not. Should never return \code{NULL}
+#'   or \code{NA}.
+#' @param ... Other parameters to pass to \code{FUNC}.
+#' @param .progress Progress bar; see \code{\link[plyr]{adply}}.
+#' @param .inform Extra error handling; see \code{\link[plyr]{adply}}.
+#' @param .parallel Use the parallel package; see \code{\link[plyr]{adply}}.
+#' @param .paropts Options if using the parallel package; see \code{\link[plyr]{adply}}.
+#' @param .id Id column; see \code{\link[plyr]{adply}}.
+#'
+#' @return The count of matching reads
+#'
+#' @seealso samReadFilter
+#'
+#' @examples
+#' \dontrun{
+#' sam <- Sam("someFile")
+#' hivIntegrationCount <- samReadCount( sam, "readIsOnRef", "^chrMT$" )
+#' }
+#'
+#' @export
+samReadCount <- function( sam, FUNC, ...,
+	.progress= "none", .inform= FALSE, .parallel= FALSE, .paropts= NULL, .id= NA
+) {
+	sum( samReadMatch( sam, FUNC, ...,
+	    .progress= .progress, .inform= .inform, .parallel= .parallel,
+	    .paropts= .paropts, .id= .id ))
+}
+
+#' Identify reads matching an applied filter.
+#'
+#' Apply a filter to a sam object, returning a logical vector specifying which
+#' reads match the filter, i.e. the result of the filter \code{FUNC} for each
+#' read. Uses \code{\link[plyr]{adply}} to apply this filter to each read
+#' alignment. Many of the parameters are just pass-through parameters for
+#' \code{\link[plyr]{adply}}. These all begin with a "\code{.}" to distinguish
+#' them from potential parameters to the function as they come after the
+#' \code{...} in the function definition. No attempt is made to keep or delete
+#' both ends of a paired end read if one end passes and one end fails the
+#' filter.
+#'
+#' @param sam A Sam object
+#' @param FUNC A function whose first parameter is a single read and that
+#'   returns a single \code{TRUE} if that read should be kept when filtering the
+#'   \code{sam} object, or \code{FALSE} if not. Should never return \code{NULL}
+#'   or \code{NA}.
+#' @param ... Other parameters to pass to \code{FUNC}.
+#' @param .progress Progress bar; see \code{\link[plyr]{adply}}.
+#' @param .inform Extra error handling; see \code{\link[plyr]{adply}}.
+#' @param .parallel Use the parallel package; see \code{\link[plyr]{adply}}.
+#' @param .paropts Options if using the parallel package; see \code{\link[plyr]{adply}}.
+#' @param .id Id column; see \code{\link[plyr]{adply}}.
+#'
+#' @return A logical vector with \code{TRUE} for each read that passed the
+#' filter \code{FUNC} and \code{FALSE} otherwise.
+#'
+#' @seealso Sam, readIsChimeric,
+#'
+#' @examples
+#' \dontrun{
+#' sam <- Sam("someFile")
+#' hivIntegrationSelect <- samReadFilter( sam, "readIsOnRef", "^chrMT$" )
+#' }
+#'
+#' @export
+samReadMatch <- function( sam, FUNC, ...,
+	.progress= "none", .inform= FALSE, .parallel= FALSE, .paropts= NULL, .id= NA
+) {
+	selectionVec <- plyr::aaply(
 		.data= sam$reads, .margins= 1, .fun= FUNC, ..., .expand= FALSE,
 		.progress= .progress, .inform= .inform, .parallel= .parallel,
 		.paropts= .paropts
-	), ]
-	sam
+	)
+	names(selectionVec) <- NULL
+	selectionVec
 }
 
 #' Paired-end read tests
@@ -100,7 +202,7 @@ samReadFilter <- function( sam, FUNC, ...,
 #' @param ref Regular expression matched against the reference that this end
 #'   and/or the other end aligns to. Keeps a read if \code{ref} matches to
 #'   either (\code{rname}) and/or (\code{rnext}).
-#' @param altRef Reqular expression that matches the chromosome/reference name of
+#' @param altRef Regular expression that matches the chromosome/reference name of
 #'   whichever end \code{ref1} does not match.
 #'
 #' @return Returns \code{TRUE} if a read passes the test, \code{FALSE}
@@ -125,10 +227,10 @@ samReadFilter <- function( sam, FUNC, ...,
 NULL
 #NULL
 
-#' @describeIn pairedEndReadTests selects paired end reads when both ends
+#' @describeIn pairedEndReadTests selects paired end alignments when both ends
 #' are aligned. Relies on accuracy of READ_UNMAPPED and MATE_UNMAPPED flags and
-#' does not consider any other indicators. This may select multiple reads for one
-#' or both ends.
+#' does not consider any other indicators. This will select non-primary
+#' alignments as well as primary alignments, if included in the sam file.
 #'
 #' @export
 pairIsAligned <- function(read) {
@@ -175,7 +277,7 @@ pairIsChimeric <- function(read, ref, altRef=NULL ) {
 
 #' @describeIn pairedEndReadTests Identifies paired end reads when both ends are
 #'   aligned to the same reference or chromosome and the other end to a different
-#'   one. Takes a regular expressiona, and will return TRUE only if both a reads
+#'   one. Takes a regular expression, and will return TRUE only if both a reads
 #'   \code{rnext} and \code{rname} match it.
 #'
 #' @export

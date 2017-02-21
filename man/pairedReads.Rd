@@ -23,7 +23,7 @@ ends.
 }
 \details{
 This allows dropping unpaired reads after filtering that might only drop one
-read of a pair, such a filtering by quality.
+read of a pair, such as filtering by quality.
 }
 \examples{
 \dontrun{

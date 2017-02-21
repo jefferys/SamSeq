@@ -26,7 +26,7 @@ pairIsNotChimeric(read, ref)
 and/or the other end aligns to. Keeps a read if \code{ref} matches to
 either (\code{rname}) and/or (\code{rnext}).}
 
-\item{altRef}{Reqular expression that matches the chromosome/reference name of
+\item{altRef}{Regular expression that matches the chromosome/reference name of
 whichever end \code{ref1} does not match.}
 }
 \value{
@@ -42,10 +42,10 @@ application.
 }
 \section{Functions}{
 \itemize{
-\item \code{pairIsAligned}: selects paired end reads when both ends
+\item \code{pairIsAligned}: selects paired end alignments when both ends
 are aligned. Relies on accuracy of READ_UNMAPPED and MATE_UNMAPPED flags and
-does not consider any other indicators. This may select multiple reads for one
-or both ends.
+does not consider any other indicators. This will select non-primary
+alignments as well as primary alignments, if included in the sam file.
 
 \item \code{pairIsPrimary}: selects paired end reads when both ends
 are aligned and are the primary alignment. Relies on accuracy of the
@@ -64,7 +64,7 @@ is specified if the other end matches that.
 
 \item \code{pairIsNotChimeric}: Identifies paired end reads when both ends are
 aligned to the same reference or chromosome and the other end to a different
-one. Takes a regular expressiona, and will return TRUE only if both a reads
+one. Takes a regular expression, and will return TRUE only if both a reads
 \code{rnext} and \code{rname} match it.
 }}
 \examples{

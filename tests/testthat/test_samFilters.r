@@ -4,6 +4,22 @@ samFile <- file.path( "goodSamFiles", "pe.sam" )
 expect_output( sam <- Sam(samFile) )
 reads <- as.data.frame(SamReads(sam))
 
+describe( "samReadMatch", {
+	it( "Returns expected vector of true and false" )
+	readName <- reads$qname[[1]]
+	want <- (reads$qname == readName)
+	got <- samReadMatch( sam, function(x) {x$qname == readName} )
+	expect_equal(got, want)
+})
+
+describe( "samReadCount", {
+	it( "Returns expected count as sum of true and false" )
+	readName <- reads$qname[[1]]
+	want <- sum(reads$qname == readName)
+	got <- samReadCount( sam, function(x) {x$qname == readName} )
+	expect_equal(got, want)
+})
+
 describe( "samReadFilter", {
 	it( "Returns a sam object", {
 		readName <- reads[1,"qname"]
