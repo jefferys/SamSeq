@@ -11,4 +11,3 @@ used by SamTools. Tracks header information, reads, and the source file.
 Loads all reads and optionally the extra read tags. Includes functions to
 translate the Sam flags and to filter reads.
 }
-

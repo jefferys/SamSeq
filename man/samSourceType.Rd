@@ -18,4 +18,3 @@ The type of access required for the sam file the data was taken from,
 Accessor to extract the type of access required for the sam file the data was
 taken from resides.
 }
-

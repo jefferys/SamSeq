@@ -17,4 +17,3 @@ A SamHeader data frame. Currently this has only two columns, the
 \description{
 Parse strings as sam file header lines
 }
-

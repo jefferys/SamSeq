@@ -2,13 +2,13 @@
 % Please edit documentation in R/SamSource.R
 \name{SamSource}
 \alias{SamSource}
-\alias{SamSource.NULL}
-\alias{SamSource.Sam}
-\alias{SamSource.SamHeader}
-\alias{SamSource.SamReads}
-\alias{SamSource.SamSource}
 \alias{SamSource.character}
 \alias{SamSource.list}
+\alias{SamSource.Sam}
+\alias{SamSource.SamSource}
+\alias{SamSource.SamHeader}
+\alias{SamSource.SamReads}
+\alias{SamSource.NULL}
 \title{Create or retrieve \code{SamSource} objects.}
 \usage{
 SamSource(x, ...)
@@ -72,4 +72,3 @@ using \code{SamSource()}.
   source4 <- SamSource(NULL)
 }
 }
-

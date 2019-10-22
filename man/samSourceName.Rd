@@ -15,4 +15,3 @@ The name of the source sam data file as a character vector.
 \description{
 Accessor to extract the name of the sam file data was taken from.
 }
-

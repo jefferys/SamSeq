@@ -50,4 +50,3 @@ hivIntegrationCount <- samReadCount( sam, "readIsOnRef", "^chrMT$" )
 \seealso{
 samReadFilter
 }
-

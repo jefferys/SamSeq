@@ -7,15 +7,14 @@
 parseSamReadTags(tagList, startAt = 12)
 }
 \arguments{
-\item{tagList}{An un-named list with one element per read line, in order, where each
-element is an un-named list, one element per field, where each field after a
-given column (by default 12) is a key:typeFlag:value optional sam tag. Order
-of the tags in the list is unimportant (although it does affect the order
-of the tags in the returned data frame).}
+\item{tagList}{An un-named list with one element per read line, in order. Each read line
+element is itself an un-named list with one element per sam record field. Each field from a
+given column (by default 12) must be an optional sam tag formatted as key:typeFlag:value. Only these optional sam tags are parsed. If only optional tags are present, can set \code{startAt= 1}. The
+order of optional tags as first encountedered determines the order reported.}
 
 \item{startAt}{The first column in the field list that is to be parsed. All
 columns after this are assumed to be optional tag fields. By default the
-12'th column is the start of the optional tags.}
+12'th column is the start of the optional tags; this is the default full sam record.}
 }
 \value{
 A data frame with one column per two character parsed tag. Values are
@@ -25,5 +24,11 @@ have a value of NA on any line where it is not found.
 }
 \description{
 Parse the optional sam read tags into a data frame
+}
+\section{Messages}{
+
+
+As this takes a long time, intermediate messages are printed to STDOUT
+while running.
 }
 

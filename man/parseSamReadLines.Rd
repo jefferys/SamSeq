@@ -22,4 +22,3 @@ A data frame of the parsed read lines, with required column names
 \description{
 Parse Sam file read lines
 }
-

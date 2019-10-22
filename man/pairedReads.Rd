@@ -33,4 +33,3 @@ unpairedOnly <- pairedReads(sam, FALSE)
 }
 
 }
-

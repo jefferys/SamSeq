@@ -23,4 +23,3 @@ The total number of read records in the Sam file object.
 \description{
 Read statistics
 }
-
