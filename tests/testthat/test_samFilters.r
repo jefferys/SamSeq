@@ -34,7 +34,7 @@ describe( "samReadFilter", {
 		got <- as.data.frame(SamReads(samReadFilter( sam, function(x) {x$qname == readName} )))
 		expect_true(nrow(got) < nrow(reads), "Filtered something")
 		want <- reads[reads[, "qname"] == readName, ]
-		expect_equivalent( got, want, "Read DF should be the same, but not attr." )
+		expect_equivalent( got, want, message = "Read DF should be the same, but not attr." )
 	})
 })
 
