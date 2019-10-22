@@ -17,4 +17,3 @@ The name name of the host machine where the sam file the data was
 Accessor to extract the name of the host machine where the sam file the data
 was taken from resides.
 }
-

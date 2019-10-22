@@ -54,4 +54,3 @@ hivIntegrationSam <- samReadFilter( sam, "readIsOnRef", "^chrMT$" )
 \seealso{
 Sam, readIsChimeric,
 }
-

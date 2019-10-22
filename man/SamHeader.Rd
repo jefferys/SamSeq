@@ -2,8 +2,8 @@
 % Please edit documentation in R/SamHeader.R
 \name{SamHeader}
 \alias{SamHeader}
-\alias{SamHeader.Sam}
 \alias{SamHeader.character}
+\alias{SamHeader.Sam}
 \alias{as.data.frame.SamHeader}
 \title{Return a SamHeader object}
 \usage{
@@ -49,7 +49,7 @@ S3 method that returns an S3 SamHeader objet.
   false. The object also has an attribute, \code{source}, which is the source
   object. This structure may change on a patch release with no notice.
 }
+
 \seealso{
 Sam, SamSource, as.data.frame.SamSource
 }
-

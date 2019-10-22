@@ -37,7 +37,7 @@ samFlagDescriptions= c(
 	NOT_PRIMARY_ALIGNMENT= "This is a secondary alignment for this segment (end)",
 	READ_FAILS_VENDOR_QC= "Fails (some) quality control measure.",
 	DUPLICATE_READ= "Is a PCR or optical duplicate.",
-	SUPPLEMENTARY_ALIGNMENT= "This is a supplementary alignment for this segment (end)."
+	SUPPLEMENTARY_ALIGNMENT= "This is a supplementary (chimeric) alignment for this segment (end)."
 )
 
 samFlagDescriptor <- BinaryFlagDescriptor( samFlagDescriptions )

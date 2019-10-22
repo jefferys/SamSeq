@@ -55,6 +55,7 @@ two columns are: \itemize{
 project on github, specifically the MIT licensed file
 \href{https://github.com/samtools/htsjdk/blob/master/src/main/java/htsjdk/samtools/SAMFlag.java}{SAMFlag.java}
 }
+
 \examples{
 # Get list of flag names, values, and descriptions
 samFlags()
@@ -82,4 +83,3 @@ samFlags( 3 )
 #>                   FALSE                TRUE                 TRUE
 
 }
-

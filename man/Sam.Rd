@@ -40,4 +40,3 @@ myReads <- samReads(samObj)
 mySource <- samSource(samObj)
 }
 }
-
