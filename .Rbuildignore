@@ -3,5 +3,3 @@
 ^README\.Rmd$
 ^README-.*\.png$
 ^\.travis\.yml$
-^SRJ.*
-*./SRJ.*
