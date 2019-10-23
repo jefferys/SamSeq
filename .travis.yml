@@ -1,11 +1,4 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-
-r:
- - oldrel
-
-r_github_packages:
- - jefferys/SamSeq
-
 cache: packages
