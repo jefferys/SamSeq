@@ -23,7 +23,6 @@ The `Sam` S3 class is the core of the package. Objects of class `Sam` are initia
 
 ```{r}
 library("SamSeq")
-stop( list.files( system.file( package="SamSeq" )))
 samFile <- system.file( "extdata", "pe.sam", package= "SamSeq", mustWork= TRUE )
 samObj <- Sam( samFile )
 ```
